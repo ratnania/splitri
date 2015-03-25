@@ -7,7 +7,7 @@ import matplotlib.tri as mtri
 import matplotlib.pyplot as plt
 import scipy
 from scipy.special import binom as sc_binom
-from bezier_patch import *
+from splitri.bezier_patch import *
 
 def make_triangle_1(degree):
     vertices = np.zeros((3,2))
