@@ -34,16 +34,16 @@ package_dir={  'splitri': 'splitri'\
               ,}
 
 ext_modules  = [ \
-#                # ... bsplines extension
-#                 Extension('caid.core.bezier', \
-#                           sources = ['caid/core/bezier.pyf', \
-#                                      'caid/core/bezier.F90'], \
-#                           f2py_options = ['--quiet'], \
-#                           define_macros = [ \
-#                                            #('F2PY_REPORT_ATEXIT', 0),
-#                                            ('F2PY_REPORT_ON_ARRAY_COPY', 0)] \
-#                          ) \
-#                # ...
+                # ... bsplines extension
+                 Extension('caid.core.bezier', \
+                           sources = ['caid/core/bezier.pyf', \
+                                      'caid/core/bezier.F90'], \
+                           f2py_options = ['--quiet'], \
+                           define_macros = [ \
+                                            #('F2PY_REPORT_ATEXIT', 0),
+                                            ('F2PY_REPORT_ON_ARRAY_COPY', 0)] \
+                          ) \
+                # ...
                 ,]
 
 def setup_package():
@@ -51,7 +51,7 @@ def setup_package():
         setup_args['install_requires'] = ['numpy']
     setup(  packages = packages \
           , package_dir=package_dir \
-          , ext_modules=ext_modules \
+#          , ext_modules=ext_modules \
           , **setup_args)
 
 if __name__ == "__main__":
