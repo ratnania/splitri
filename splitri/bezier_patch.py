@@ -8,25 +8,7 @@ import matplotlib.pyplot as plt
 import scipy
 from scipy.special import binom as sc_binom
 
-# ...
-#targets = np.array([[.1,0.], [.9,.49], [.1,.6], [.4,.9]])
-## ...
-#
-## ... pre-compute all binomial coef needed
-#degree = 4
-#allBinom = []
-#for d in range(0,degree+1):
-#    values = np.zeros(d+1)
-#    for i in range(0, d+1):
-#        values[i] = sc_binom(d,i)
-#    allBinom.append(values)
-#
-##for d in range(0, degree+1):
-##    print(len(allBinom[d]))
-#
-#def binom(n,i):
-#    return allBinom[n][i]
-# ...
+from .bernstein import *
 
 # ...
 def barycentric_coords(vertices, point):
@@ -35,21 +17,6 @@ def barycentric_coords(vertices, point):
     v.resize(len(vertices))
     v[-1] = 1-v.sum()
     return v
-# ...
-
-# ...
-#def bezier(x,y,i,j,n):
-#    A = np.array([x,y])
-#    t_id = tri.find_simplex(targets)[0]
-#    vertices = tri.points[tri.vertices[t_id,:]]
-#    c = barycentric_coords(vertices, A)
-#    t0 = c[0] ; t1 = c[1] ; t2 = c[2]
-#    k = n - j - i
-#    v = 1.
-##    v = t0**i * t1**j * t2**k
-#    v *= binom(n,i)
-#    v *= binom(n-i,j)
-#    return v
 # ...
 
 class bezier_patch(object):
@@ -68,6 +35,7 @@ class bezier_patch(object):
                 self._create_b_net(degree, vertices, control, weights, method)
 
         # strating from here self.degree, self.vertices, self.b_net must be initialized
+        self._bernstein = bernstein(self.degree)
         self._n_ptachs = self.vertices.shape[0]
 
         self._init_local_id()
@@ -102,7 +70,7 @@ class bezier_patch(object):
 
     @property
     def points(self):
-        return self._array
+        return self._array[...,:self.dim]
 
     @property
     def control(self):
@@ -231,6 +199,18 @@ class bezier_patch(object):
         bzr._triangles = self.triangles
         return bzr
 
+    def find_simplex(self, xyz):
+        """
+        returns the id of the triangle that contains the point xyz
+        """
+#        c = barycentric_coords(self.vertices, xyz)
+        # TODO must be done using numpy arrays without a loop
+        for i in range(0, self.vertices.shape[0]):
+            c = barycentric_coords(self.vertices[i,:], xyz)
+            if np.array(c).prod() >= 0:
+                return i
+        return None
+
     def extract_edge(self, T_id, edge_id):
         ids = self._ids_on_edges[edge_id]
         points = self.array[T_id, ids,:self.dim]
@@ -289,3 +269,36 @@ class bezier_patch(object):
     def elevate(self, times):
         pass
 
+    def __call__(self, xy):
+        """
+        evaluates the surface using bernstein polynomial
+        """
+        A = np.array(xy)
+        T_id = self.find_simplex(A)
+        vertices = self.vertices[T_id,...]
+        coeffs = self.control[T_id,...]
+        c = barycentric_coords(vertices, A)
+
+        value = 0.
+        i_pos = 0
+        for i in range(0, self.degree+1):
+            for j in range(0, self.degree+1-i):
+                k = self.degree - i - j
+                bern = self._bernstein([i,j,k], c)
+                value += bern * coeffs[i_pos]
+                i_pos += 1
+        return value
+
+    def plot(self):
+        for T_id in range(0, self.n_patchs):
+            points = self.points[T_id,...]
+    #        for i in range(0, points.shape[0]):
+    #            plt.plot(points[i,0], points[i,1], "or")
+            triangles = self.triangles[T_id, ...]
+            plt.triplot(points[:,0], points[:,1], triangles, 'b-')
+
+            z = []
+            for i in range(0, points.shape[0]):
+                z.append(self(points[i,:]))
+            z = np.array(z)
+            plt.tricontourf(points[:,0], points[:,1], triangles, z)

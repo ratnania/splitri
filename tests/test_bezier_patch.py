@@ -17,8 +17,8 @@ def make_triangle_1(degree):
     vertices[0,0,1] = 1.0 ; vertices[0,1,1] =  0.0 ; vertices[0,2,1] = 0.0
     return bezier_patch(degree, vertices)
 
-def make_triangle_2():
-    T = make_triangle_1(3)
+def make_triangle_2(degree):
+    T = make_triangle_1(degree)
 
     ids = T._ids_on_edges[0]
     points = T.array[0,ids,...]
@@ -27,7 +27,7 @@ def make_triangle_2():
 
     return T
 
-def make_triangles_1():
+def make_triangles_1(degree):
     vertices = np.zeros((2,3,2))
     #           A                B                     C
     # ... Triangle id = 0
@@ -121,21 +121,6 @@ def make_triangles_3(degree):
         vertices[T_id, :, :] = points[ids, :]
     # ...
 
-    bern = bernstein(degree)
-
-    def evaluate(ijk, xy):
-        A = np.array(xy)
-        t_id = tri.find_simplex([A])[0]
-        vertices = tri.points[tri.vertices[t_id,:]]
-        c = barycentric_coords(vertices, A)
-        v = bern([i,j,k], c)
-        return v
-
-    for i in range(0, degree+1):
-        for j in range(0, degree+1-i):
-            k = degree - i - j
-            v = evaluate([i,j,k], [0.5, 0.5])
-            print v
     return bezier_patch(degree, vertices)
 
 def test_1():
@@ -202,8 +187,10 @@ def test_1():
 
 
 def test_2():
-    bzr = make_triangles_1()
+    bzr = make_triangles_1(3)
     bzr_1 = bzr.copy()
+
+    print bzr.find_simplex([0.5,0.5])
 
     xlim = [-2.2, 2.2]
     ylim = [-2.2, 2.2]
@@ -247,7 +234,8 @@ def test_3():
     plt.show()
 
 def test_4():
-    bzr = make_triangles_3(3)
+    degree = 3
+    bzr = make_triangles_3(degree)
     b_coeff = np.random.rand(bzr.shape)
 
     bzr.set_b_coefficients(b_coeff)
@@ -261,13 +249,8 @@ def test_4():
     plt.xlim(*xlim)
     plt.ylim(*ylim)
 
-    for T_id in range(0, bzr.n_patchs):
-        points = bzr.points[T_id,...]
-#        for i in range(0, points.shape[0]):
-#            plt.plot(points[i,0], points[i,1], "or")
-        triangles = bzr.triangles[T_id, ...]
-        plt.triplot(points[:,0], points[:,1], triangles, 'b-')
-
+    bzr.plot()
+    plt.colorbar()
     plt.show()
 
 #########################################################
