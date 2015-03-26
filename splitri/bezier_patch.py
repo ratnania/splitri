@@ -3,7 +3,7 @@ import numpy as np
 from numpy import cos, sin, pi
 import numpy.linalg as la
 from scipy.spatial import Delaunay
-import matplotlib.tri as mtri
+import matplotlib.tri as tri
 import matplotlib.pyplot as plt
 import scipy
 from scipy.special import binom as sc_binom
@@ -300,25 +300,54 @@ class bezier_patch(object):
         return value
 
     def plot(self):
-        triangles = []
         points    = []
         for T_id in range(0, self.n_patchs):
-            for loc_T_id in range(0, self.all_triangles.shape[1]):
-                triangles.append(list(self.all_triangles[T_id, loc_T_id, ...]))
             for loc_id in range(0, self.points.shape[1]):
                 points.append(list(self.points[T_id, loc_id, ...]))
         points    = np.array(points)
-        triangles = np.array(triangles, dtype=np.int32)
 
         x = points[:,0]
         y = points[:,1]
-        xmid = x[triangles].mean(axis=1)
-        ymid = y[triangles].mean(axis=1)
-        zfaces = np.zeros_like(xmid)
-        for i in range(0, zfaces.shape[0]):
-            zfaces[i] = self.__call__([xmid[i], ymid[i]])
 
-        plt.tripcolor(x, y, triangles, facecolors=zfaces) #, edgecolors='k')
+        # Create the Triangulation; no triangles so Delaunay triangulation created.
+        triang = tri.Triangulation(x, y)
+        triangles = triang.triangles
+
+        z = np.zeros_like(x)
+        for i in range(0, z.shape[0]):
+            z[i] = self.__call__([x[i], y[i]])
+        plt.tripcolor(triang, z, shading='gouraud', cmap=plt.cm.rainbow)
+
+#        # Mask off unwanted triangles.
+#        xmid = x[triangles].mean(axis=1)
+#        ymid = y[triangles].mean(axis=1)
+#
+#        zfaces = np.zeros_like(xmid)
+#        for i in range(0, zfaces.shape[0]):
+#            zfaces[i] = self.__call__([xmid[i], ymid[i]])
+#        plt.tripcolor(x, y, triangles, facecolors=zfaces, shading='gouraud',
+#                      cmap=plt.cm.rainbow) #, edgecolors='k')
+
+#    def plot(self):
+#        triangles = []
+#        points    = []
+#        for T_id in range(0, self.n_patchs):
+#            for loc_T_id in range(0, self.all_triangles.shape[1]):
+#                triangles.append(list(self.all_triangles[T_id, loc_T_id, ...]))
+#            for loc_id in range(0, self.points.shape[1]):
+#                points.append(list(self.points[T_id, loc_id, ...]))
+#        points    = np.array(points)
+#        triangles = np.array(triangles, dtype=np.int32)
+#
+#        x = points[:,0]
+#        y = points[:,1]
+#        xmid = x[triangles].mean(axis=1)
+#        ymid = y[triangles].mean(axis=1)
+#        zfaces = np.zeros_like(xmid)
+#        for i in range(0, zfaces.shape[0]):
+#            zfaces[i] = self.__call__([xmid[i], ymid[i]])
+#
+#        plt.tripcolor(x, y, triangles, facecolors=zfaces) #, edgecolors='k')
 
 
 
