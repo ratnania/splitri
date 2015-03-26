@@ -42,7 +42,7 @@ def make_triangles_1(degree):
 
 def make_triangles_square(degree):
     # ...
-    n = 5
+    n = 10
     u = np.linspace(0.,1.,n)
     v = np.linspace(0.,1.,n)
 
@@ -234,23 +234,31 @@ def test_3():
     plt.show()
 
 def test_4():
-    degree = 3
-    bzr = make_triangles_3(degree)
-    b_coeff = np.random.rand(bzr.shape)
+    degree = 5
+#    bzr = make_triangles_3(degree)
+    bzr = make_triangles_square(degree)
+#    b_coeff = np.random.rand(bzr.shape)
+    x = bzr.points[...,0]
+    y = bzr.points[...,1]
+    sin = np.sin ; pi = np.pi
+#    b_coeff = np.ones_like(bzr.points[...,0])
+#    b_coeff = sin(2*pi*x)*sin(2*pi*y)
+    b_coeff = x**2 + y**2
 
     bzr.set_b_coefficients(b_coeff)
 
-    xlim = [-2.2, 2.2]
-    ylim = [-2.2, 2.2]
 
     plt.figure()
 #    plt.axis('off')
 #    plt.gca().set_aspect('equal')
-    plt.xlim(*xlim)
-    plt.ylim(*ylim)
+#    xlim = [-2.2, 2.2]
+#    ylim = [-2.2, 2.2]
+#    plt.xlim(*xlim)
+#    plt.ylim(*ylim)
 
+#    bzr.plot(nlevel=20, vmin=-0.1, vmax=2.1)
     bzr.plot()
-    plt.colorbar()
+#    plt.colorbar()
     plt.show()
 
 #########################################################

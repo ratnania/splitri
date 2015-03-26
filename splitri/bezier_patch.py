@@ -27,6 +27,7 @@ class bezier_patch(object):
         # C = vertices[i,2,:]
         self._array     = None
         self._triangles = []
+        self._all_triangles = []
         self._n_patchs  = None
 
         if vertices is not None:
@@ -83,6 +84,10 @@ class bezier_patch(object):
     @property
     def triangles(self):
         return self._triangles
+
+    @property
+    def all_triangles(self):
+        return self._all_triangles
 
     @property
     def edge(self, face):
@@ -161,6 +166,7 @@ class bezier_patch(object):
 
     def _create_triangulation(self):
         self._triangles = []
+        self._all_triangles = []
         for T_id in range(0, self.n_patchs):
             loc_triangles = []
             # top triangles
@@ -181,8 +187,12 @@ class bezier_patch(object):
                     I3 = self.local_id(i-1,j+1,k)
     #                print "DOWN ", [I1, I2, I3]
                     loc_triangles.append([I1, I2, I3])
-            self._triangles.append(np.array(loc_triangles))
+            loc_triangles = np.array(loc_triangles)
+            self._triangles.append(loc_triangles)
+            n_tri = T_id * self.shape
+            self._all_triangles.append(loc_triangles+n_tri)
         self._triangles = np.array(self._triangles)
+        self._all_triangles = np.array(self._all_triangles)
 
     def set_b_coefficients(self, control):
         self._array[...,self.dim] = control
@@ -290,15 +300,58 @@ class bezier_patch(object):
         return value
 
     def plot(self):
+        triangles = []
+        points    = []
         for T_id in range(0, self.n_patchs):
-            points = self.points[T_id,...]
-    #        for i in range(0, points.shape[0]):
-    #            plt.plot(points[i,0], points[i,1], "or")
-            triangles = self.triangles[T_id, ...]
-            plt.triplot(points[:,0], points[:,1], triangles, 'b-')
+            for loc_T_id in range(0, self.all_triangles.shape[1]):
+                triangles.append(list(self.all_triangles[T_id, loc_T_id, ...]))
+            for loc_id in range(0, self.points.shape[1]):
+                points.append(list(self.points[T_id, loc_id, ...]))
+        points    = np.array(points)
+        triangles = np.array(triangles, dtype=np.int32)
 
-            z = []
-            for i in range(0, points.shape[0]):
-                z.append(self(points[i,:]))
-            z = np.array(z)
-            plt.tricontourf(points[:,0], points[:,1], triangles, z)
+        x = points[:,0]
+        y = points[:,1]
+        xmid = x[triangles].mean(axis=1)
+        ymid = y[triangles].mean(axis=1)
+        zfaces = np.zeros_like(xmid)
+        for i in range(0, zfaces.shape[0]):
+            zfaces[i] = self.__call__([xmid[i], ymid[i]])
+
+        plt.tripcolor(x, y, triangles, facecolors=zfaces) #, edgecolors='k')
+
+
+
+#    def plot(self, nlevel=10, vmin=None, vmax=None):
+#        if vmin is None:
+#            vmin = self.control.min()
+#        if vmax is None:
+#            vmax = self.control.max()
+#        levels = np.linspace(vmin, vmax, nlevel)
+#        for T_id in range(0, self.n_patchs):
+#            points   = self.points[T_id,...]
+#
+#    #        for i in range(0, points.shape[0]):
+#    #            plt.plot(points[i,0], points[i,1], "or")
+#            triangles = self.triangles[T_id, ...]
+##            plt.triplot(points[:,0], points[:,1], triangles, 'b-')
+#
+#            z = []
+#            for i in range(0, points.shape[0]):
+#                z.append(self.__call__(points[i,:]))
+#            z = np.array(z)
+#            x = points[:,0]
+#            y = points[:,1]
+#            plt.tricontourf(x, y, triangles, z)#, levels=levels)
+#
+##            z = []
+##            for i in range(0, triangles.shape[0]):
+##                A = points[i,0,:]
+##                B = points[i,1,:]
+##                C = points[i,2,:]
+##
+##                M = (A + B + C )/3.
+##                v = self.__call_(M)
+##                z.append(v)
+##            z = np.array(z)
+##            plt.tripcolor(x, y, triangles, facecolors=z) #, edgecolors='k')
