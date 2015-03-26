@@ -8,6 +8,7 @@ import matplotlib.pyplot as plt
 import scipy
 from scipy.special import binom as sc_binom
 from splitri.bezier_patch import *
+from splitri.bernstein import *
 
 def make_triangle_1(degree):
     vertices = np.zeros((1,3,2))
@@ -37,6 +38,35 @@ def make_triangles_1():
     T_id = 1
     vertices[T_id,0,0] = 1.0 ; vertices[T_id,1,0] = -1.0 ; vertices[T_id,2,0] = 0.0
     vertices[T_id,0,1] = 0.0 ; vertices[T_id,1,1] =  0.0 ; vertices[T_id,2,1] = -1.0
+    return bezier_patch(degree, vertices)
+
+def make_triangles_square(degree):
+    # ...
+    n = 5
+    u = np.linspace(0.,1.,n)
+    v = np.linspace(0.,1.,n)
+
+    U,V = np.meshgrid(u,v)
+
+    u = U.reshape(U.size)
+    v = V.reshape(V.size)
+    # ...
+
+    # ...
+    points = np.zeros((U.size, 2))
+    points[:,0] = u
+    points[:,1] = v
+    # ...
+
+    # ... create the tesselation, triangulation
+    tri = Delaunay(points)
+    n_triangles = tri.simplices.shape[0]
+    vertices = np.zeros((n_triangles, 3, 2))
+    for T_id in range(0, n_triangles):
+        ids = tri.simplices[T_id,:]
+        vertices[T_id, :, :] = points[ids, :]
+    # ...
+
     return bezier_patch(degree, vertices)
 
 def make_triangles_2(degree):
@@ -73,6 +103,39 @@ def make_triangles_2(degree):
         vertices[T_id, :, :] = points[ids, :]
     # ...
 
+    return bezier_patch(degree, vertices)
+
+def make_triangles_3(degree):
+    points = np.zeros((4,2))
+    points[0,:] = [0.0, 1.0] # A
+    points[1,:] = [-1., 0.0] # B
+    points[2,:] = [1.0, 0.0] # C
+    points[3,:] = [0.0, -1.] # D
+
+    # ... create the tesselation, triangulation
+    tri = Delaunay(points)
+    n_triangles = tri.simplices.shape[0]
+    vertices = np.zeros((n_triangles, 3, 2))
+    for T_id in range(0, n_triangles):
+        ids = tri.simplices[T_id,:]
+        vertices[T_id, :, :] = points[ids, :]
+    # ...
+
+    bern = bernstein(degree)
+
+    def evaluate(ijk, xy):
+        A = np.array(xy)
+        t_id = tri.find_simplex([A])[0]
+        vertices = tri.points[tri.vertices[t_id,:]]
+        c = barycentric_coords(vertices, A)
+        v = bern([i,j,k], c)
+        return v
+
+    for i in range(0, degree+1):
+        for j in range(0, degree+1-i):
+            k = degree - i - j
+            v = evaluate([i,j,k], [0.5, 0.5])
+            print v
     return bezier_patch(degree, vertices)
 
 def test_1():
@@ -161,8 +224,33 @@ def test_2():
     plt.show()
 
 def test_3():
-    bzr = make_triangles_2(5)
+#    bzr = make_triangles_2(5)
+    bzr = make_triangles_square(5)
     bzr_1 = bzr.copy()
+
+    xlim = [-.2, 1.2]
+    ylim = [-.2, 1.2]
+
+    plt.figure()
+#    plt.axis('off')
+#    plt.gca().set_aspect('equal')
+    plt.xlim(*xlim)
+    plt.ylim(*ylim)
+
+    for T_id in range(0, bzr.n_patchs):
+        points = bzr.points[T_id,...]
+#        for i in range(0, points.shape[0]):
+#            plt.plot(points[i,0], points[i,1], "or")
+        triangles = bzr.triangles[T_id, ...]
+        plt.triplot(points[:,0], points[:,1], triangles, 'b-')
+
+    plt.show()
+
+def test_4():
+    bzr = make_triangles_3(3)
+    b_coeff = np.random.rand(bzr.shape)
+
+    bzr.set_b_coefficients(b_coeff)
 
     xlim = [-2.2, 2.2]
     ylim = [-2.2, 2.2]
@@ -184,6 +272,7 @@ def test_3():
 
 #########################################################
 if __name__ == "__main__":
-    test_1()
+#    test_1()
 #    test_2()
 #    test_3()
+    test_4()

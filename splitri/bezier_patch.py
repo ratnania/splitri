@@ -9,23 +9,23 @@ import scipy
 from scipy.special import binom as sc_binom
 
 # ...
-targets = np.array([[.1,0.], [.9,.49], [.1,.6], [.4,.9]])
-# ...
-
-# ... pre-compute all binomial coef needed
-degree = 4
-allBinom = []
-for d in range(0,degree+1):
-    values = np.zeros(d+1)
-    for i in range(0, d+1):
-        values[i] = sc_binom(d,i)
-    allBinom.append(values)
-
-#for d in range(0, degree+1):
-#    print(len(allBinom[d]))
-
-def binom(n,i):
-    return allBinom[n][i]
+#targets = np.array([[.1,0.], [.9,.49], [.1,.6], [.4,.9]])
+## ...
+#
+## ... pre-compute all binomial coef needed
+#degree = 4
+#allBinom = []
+#for d in range(0,degree+1):
+#    values = np.zeros(d+1)
+#    for i in range(0, d+1):
+#        values[i] = sc_binom(d,i)
+#    allBinom.append(values)
+#
+##for d in range(0, degree+1):
+##    print(len(allBinom[d]))
+#
+#def binom(n,i):
+#    return allBinom[n][i]
 # ...
 
 # ...
@@ -38,22 +38,22 @@ def barycentric_coords(vertices, point):
 # ...
 
 # ...
-def bezier(x,y,i,j,n):
-    A = np.array([x,y])
-    t_id = tri.find_simplex(targets)[0]
-    vertices = tri.points[tri.vertices[t_id,:]]
-    c = barycentric_coords(vertices, A)
-    t0 = c[0] ; t1 = c[1] ; t2 = c[2]
-    k = n - j - i
-    v = 1.
-#    v = t0**i * t1**j * t2**k
-    v *= binom(n,i)
-    v *= binom(n-i,j)
-    return v
+#def bezier(x,y,i,j,n):
+#    A = np.array([x,y])
+#    t_id = tri.find_simplex(targets)[0]
+#    vertices = tri.points[tri.vertices[t_id,:]]
+#    c = barycentric_coords(vertices, A)
+#    t0 = c[0] ; t1 = c[1] ; t2 = c[2]
+#    k = n - j - i
+#    v = 1.
+##    v = t0**i * t1**j * t2**k
+#    v *= binom(n,i)
+#    v *= binom(n-i,j)
+#    return v
 # ...
 
 class bezier_patch(object):
-    def __init__(self, degree=None, vertices=None, control=None, method="uniform"):
+    def __init__(self, degree=None, vertices=None, control=None, weights=None, method="uniform"):
         # creates a triangular bezier patch given the 3 summets of a triangle i and a total degree
         # A = vertices[i,0,:]
         # B = vertices[i,1,:]
@@ -62,13 +62,10 @@ class bezier_patch(object):
         self._triangles = []
         self._n_patchs  = None
 
-        if control is None:
-            assert degree is not None
-            assert vertices is not None
-#            assert vertices is not None
-
+        if vertices is not None:
             self._vertices = vertices
-            self._create_b_net(degree, vertices, method)
+            if degree is not None:
+                self._create_b_net(degree, vertices, control, weights, method)
 
         # strating from here self.degree, self.vertices, self.b_net must be initialized
         self._n_ptachs = self.vertices.shape[0]
@@ -79,7 +76,8 @@ class bezier_patch(object):
 
     @property
     def dim(self):
-        return self._array.shape[-1]
+        # total dim = dim + 1 (control) + 1 (weights/ not yet used)
+        return self._array.shape[-1] - 1 - 1
 
     @property
     def vertices(self):
@@ -108,7 +106,11 @@ class bezier_patch(object):
 
     @property
     def control(self):
-        return self._array
+        return self._array[:,:,self.dim]
+
+    @property
+    def weights(self):
+        return self._array[:,:,self.dim+1]
 
     @property
     def triangles(self):
@@ -159,24 +161,33 @@ class bezier_patch(object):
             ids_on_edge.append(self._local_id[i,j,k])
         self._ids_on_edges.append(ids_on_edge)
 
-    def _create_b_net(self, degree, vertices, method):
+    def _create_b_net(self, degree, vertices, control, weights, method):
         n = (degree+1)*(degree+2)/2
         dim = vertices.shape[-1]
         n_patchs = vertices.shape[0]
-        b_net = np.zeros((n,dim))
-        self._array = np.zeros((n_patchs,n,dim))
+        self._array = np.zeros((n_patchs,n,dim+1+1))
         if method == "uniform":
             for T_id in range(0, n_patchs):
+                b_net = np.zeros((n,dim+1+1))
+                # set weights to 1 by defualt
+                b_net[:, dim+1] = 1.0
                 i_pos = 0
                 for i in range(0, degree+1):
                     for j in range(0, degree+1-i):
                         k = degree - i - j
 
-                        b_net[i_pos, :] = i * vertices[T_id,0,:] \
-                                        + j * vertices[T_id,1,:] \
-                                        + k * vertices[T_id,2,:]
+                        b_net[i_pos, :dim] = i * vertices[T_id,0,:dim] \
+                                           + j * vertices[T_id,1,:dim] \
+                                           + k * vertices[T_id,2,:dim]
+
+                        if control is not None:
+                            b_net[i_pos, dim] = control[T_id,i_pos]
+
+                        if weights is not None:
+                            b_net[i_pos, dim+1] = weights[T_id,i_pos]
 
                         i_pos += 1
+
                 b_net /= degree
                 self._array[T_id, ...] = b_net
 
@@ -205,6 +216,9 @@ class bezier_patch(object):
             self._triangles.append(np.array(loc_triangles))
         self._triangles = np.array(self._triangles)
 
+    def set_b_coefficients(self, control):
+        self._array[...,self.dim] = control
+
     def copy(self):
         bzr = bezier_patch.__new__(type(self))
         bzr._array = self.array.copy()
@@ -219,7 +233,7 @@ class bezier_patch(object):
 
     def extract_edge(self, T_id, edge_id):
         ids = self._ids_on_edges[edge_id]
-        points = self.array[T_id, ids,...]
+        points = self.array[T_id, ids,:self.dim]
         from igakit.nurbs import NURBS
         degree= self.degree
         U = [0.]*(degree+1) + [1.]*(degree+1)
@@ -238,7 +252,9 @@ class bezier_patch(object):
                 t[0] = displ
             else:
                 t[axis] = displ
-        self._array += displ
+
+#        self._array += displ
+        self._array[:,:,:self.dim] += displ
         return self
 
     def scale(self, scale, axis=None):
@@ -253,7 +269,8 @@ class bezier_patch(object):
                 t[0] = scale
             else:
                 t[axis] = scale
-        self._array *= scale
+#        self._array *= scale
+        self._array[:,:,:self.dim] *= scale
         return self
 
 #    def move(self, displ, axis=None):
