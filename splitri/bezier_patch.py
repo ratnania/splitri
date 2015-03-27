@@ -20,7 +20,8 @@ def barycentric_coords(vertices, point):
 # ...
 
 class bezier_patch(object):
-    def __init__(self, degree=None, vertices=None, control=None, weights=None, method="uniform"):
+    def __init__(self, nodes, triangles=None, degree=None, control=None, weights=None, method="uniform"):
+        # if triangles not given, then construct a Delaunay triangulation
         # creates a triangular bezier patch given the 3 summets of a triangle i and a total degree
         # A = vertices[i,0,:]
         # B = vertices[i,1,:]
@@ -29,11 +30,18 @@ class bezier_patch(object):
         self._local_triangles = []
         self._all_triangles = []
         self._n_patchs  = None
+        self._degree = 1
+        if degree is not None:
+            self._degree = degree
 
-        if vertices is not None:
-            self._vertices = vertices
-            if degree is not None:
-                self._create_b_net(degree, vertices, control, weights, method)
+        self._triangulation = tri.Triangulation(nodes[:,0], nodes[:,1], triangles)
+
+        self._vertices = np.zeros((len(self._triangulation.triangles), 3, 2))
+        self._vertices[:,:,0] = self._triangulation.x[self._triangulation.triangles]
+        self._vertices[:,:,1] = self._triangulation.y[self._triangulation.triangles]
+
+        if degree is not None:
+            self._create_b_net(self._degree, self._vertices, control, weights, method)
 
         # strating from here self.degree, self.vertices, self.b_net must be initialized
         self._bernstein = bernstein(self.degree)

@@ -29,17 +29,13 @@ def make_triangle_2(degree):
     return T
 
 def make_triangles_1(degree):
-    vertices = np.zeros((2,3,2))
-    #           A                B                     C
-    # ... Triangle id = 0
-    T_id = 0
-    vertices[T_id,0,0] = 0.0 ; vertices[T_id,1,0] = -1.0 ; vertices[T_id,2,0] = 1.0
-    vertices[T_id,0,1] = 1.0 ; vertices[T_id,1,1] =  0.0 ; vertices[T_id,2,1] = 0.0
-    # ... Triangle id = 1
-    T_id = 1
-    vertices[T_id,0,0] = 1.0 ; vertices[T_id,1,0] = -1.0 ; vertices[T_id,2,0] = 0.0
-    vertices[T_id,0,1] = 0.0 ; vertices[T_id,1,1] =  0.0 ; vertices[T_id,2,1] = -1.0
-    return bezier_patch(degree, vertices)
+    points = np.zeros((4,2))
+    points[0,:] = [0.0, 1.0] # A
+    points[1,:] = [-1., 0.0] # B
+    points[2,:] = [1.0, 0.0] # C
+    points[3,:] = [0.0, -1.] # D
+
+    return bezier_patch(points, degree=degree)
 
 def make_triangles_square(n,degree):
     # ...
@@ -58,20 +54,10 @@ def make_triangles_square(n,degree):
     points[:,1] = v
     # ...
 
-    # ... create the tesselation, triangulation
-    tri = Delaunay(points)
-    n_triangles = tri.simplices.shape[0]
-    vertices = np.zeros((n_triangles, 3, 2))
-    for T_id in range(0, n_triangles):
-        ids = tri.simplices[T_id,:]
-        vertices[T_id, :, :] = points[ids, :]
-    # ...
+    return bezier_patch(points, degree=degree)
 
-    return bezier_patch(degree, vertices)
-
-def make_triangles_2(degree):
+def make_triangles_collela(n,degree):
     # ...
-    n = 10
     u = np.linspace(0.,1.,n)
     v = np.linspace(0.,1.,n)
 
@@ -94,34 +80,7 @@ def make_triangles_2(degree):
     points[:,1] = Y
     # ...
 
-    # ... create the tesselation, triangulation
-    tri = Delaunay(points)
-    n_triangles = tri.simplices.shape[0]
-    vertices = np.zeros((n_triangles, 3, 2))
-    for T_id in range(0, n_triangles):
-        ids = tri.simplices[T_id,:]
-        vertices[T_id, :, :] = points[ids, :]
-    # ...
-
-    return bezier_patch(degree, vertices)
-
-def make_triangles_3(degree):
-    points = np.zeros((4,2))
-    points[0,:] = [0.0, 1.0] # A
-    points[1,:] = [-1., 0.0] # B
-    points[2,:] = [1.0, 0.0] # C
-    points[3,:] = [0.0, -1.] # D
-
-    # ... create the tesselation, triangulation
-    tri = Delaunay(points)
-    n_triangles = tri.simplices.shape[0]
-    vertices = np.zeros((n_triangles, 3, 2))
-    for T_id in range(0, n_triangles):
-        ids = tri.simplices[T_id,:]
-        vertices[T_id, :, :] = points[ids, :]
-    # ...
-
-    return bezier_patch(degree, vertices)
+    return bezier_patch(points, degree=degree)
 
 def make_triangles_4(degree):
 
@@ -166,15 +125,7 @@ def make_triangles_4(degree):
         [42, 41, 40], [72, 33, 31], [32, 31, 33], [39, 38, 72], [33, 72, 38],
         [33, 38, 34], [37, 35, 38], [34, 38, 35], [35, 37, 36]])
 
-    # ... create the tesselation, triangulation
-    n_triangles = triangles.shape[0]
-    vertices = np.zeros((n_triangles, 3, 2))
-    for T_id in range(0, n_triangles):
-        ids = triangles[T_id,:]
-        vertices[T_id, :, :] = xy[ids, :]
-    # ...
-
-    return bezier_patch(degree, vertices)
+    return bezier_patch(xy, triangles=triangles, degree=degree)
 
 def make_triangles_5(degree):
     # First create the x and y coordinates of the points.
@@ -194,25 +145,16 @@ def make_triangles_5(degree):
     # Create the Triangulation; no triangles so Delaunay triangulation created.
     triang = tri.Triangulation(x, y)
 
-    # Mask off unwanted triangles.
-    xmid = x[triang.triangles].mean(axis=1)
-    ymid = y[triang.triangles].mean(axis=1)
-    mask = np.where(xmid*xmid + ymid*ymid < min_radius*min_radius, 1, 0)
-    triang.set_mask(mask)
+#    # Mask off unwanted triangles.
+#    xmid = x[triang.triangles].mean(axis=1)
+#    ymid = y[triang.triangles].mean(axis=1)
+#    mask = np.where(xmid*xmid + ymid*ymid < min_radius*min_radius, 1, 0)
+#    triang.set_mask(mask)
 
-    # ... create the tesselation, triangulation
-    points = np.zeros((x.shape[0],2))
-    points[:,0] = x
-    points[:,1] = y
-    tri = Delaunay(points)
-    n_triangles = tri.simplices.shape[0]
-    vertices = np.zeros((n_triangles, 3, 2))
-    for T_id in range(0, n_triangles):
-        ids = tri.simplices[T_id,:]
-        vertices[T_id, :, :] = points[ids, :]
-    # ...
+    nodes = np.zeros((x.shape[0], 2))
+    nodes[:,0] = x ; nodes[:,1] = y
 
-    return bezier_patch(degree, vertices)
+    return bezier_patch(nodes, degree=degree)
 
 
 def test_1():
@@ -303,7 +245,7 @@ def test_2():
     plt.show()
 
 def test_3():
-#    bzr = make_triangles_2(5)
+#    bzr = make_triangles_collela(10,5)
     bzr = make_triangles_square(10,5)
     bzr_1 = bzr.copy()
 
@@ -326,33 +268,25 @@ def test_3():
     plt.show()
 
 def test_4():
-    degree = 3
+    degree = 5
 #    bzr = make_triangles_1(degree)
-#    bzr = make_triangles_2(degree)
-#    bzr = make_triangles_3(degree)
 #    bzr = make_triangles_4(degree)
 ###    bzr = make_triangles_5(degree)
-    bzr = make_triangles_square(10,degree)
+    bzr = make_triangles_collela(20,degree)
+#    bzr = make_triangles_square(10,degree)
 #    b_coeff = np.random.rand(bzr.shape)
     x = bzr.points[...,0]
     y = bzr.points[...,1]
     sin = np.sin ; pi = np.pi
 #    b_coeff = np.ones_like(bzr.points[...,0])
 #    b_coeff = sin(2*pi*x) #*sin(2*pi*y)
-#    b_coeff = x**2 + y**2
+    b_coeff = x**2 + y**2
 #    b_coeff = 16.*x*(1-x)*y*(1-y)
-    b_coeff = np.zeros_like(x)
-    b_coeff[0,0:3,...] = 1.
+#    b_coeff = np.zeros_like(x)
+#    b_coeff[0,0:3,...] = 1.
 
     bzr.set_b_coefficients(b_coeff)
-
-#    print "==========="
     bzr.update()
-#    print bzr.all_triangles.shape
-#    print a
-#    print idx
-#    print "==========="
-
 
     plt.figure()
 #    plt.axis('off')
@@ -363,8 +297,8 @@ def test_4():
 #    plt.ylim(*ylim)
 
 #    bzr.plot(nlevel=20, vmin=-0.1, vmax=2.1)
-    bzr.plot(show_triangles=True, show_values=True)
-    plt.colorbar()
+    bzr.plot(show_triangles=True, show_values=False)
+#    plt.colorbar()
 
 #    triangles = bzr.unique_triangles
 #    points = bzr.unique_points
