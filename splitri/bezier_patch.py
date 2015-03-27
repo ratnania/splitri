@@ -258,14 +258,31 @@ class bezier_patch(object):
         self._unique_points_idx = idx
 
         # ... reverse indices
+#        print idx
         reverse_idx = -np.ones(x_size, dtype=np.int32)
+        print ">>> Begin"
+#        print a
         for i in range(0, x_size):
-            try:
-                reverse_idx[i] = list(idx).index(i)
-            except:
-                for j in range(0, a.shape[0]):
-                    if np.linalg.norm(a[i]-a[j]) < 1.e-7:
-                        reverse_idx[i] = reverse_idx[j]
+            itemindex = np.where(idx==i)[0]
+#            print i, itemindex, a[i]
+            if len(itemindex) > 0:
+                reverse_idx[i] = itemindex[0]
+            else:
+                ll_condition = np.logical_and(a[i,0]== a[:, 0], a[i,1]== a[:, 1])
+                k = np.where(ll_condition)
+                reverse_idx[i] = reverse_idx[k[0][0]]
+        print "<<< End"
+#        print reverse_idx
+
+#        # ... reverse indices
+#        reverse_idx = -np.ones(x_size, dtype=np.int32)
+#        for i in range(0, x_size):
+#            try:
+#                reverse_idx[i] = list(idx).index(i)
+#            except:
+#                for j in range(0, a.shape[0]):
+#                    if np.linalg.norm(a[i]-a[j]) < 1.e-7:
+#                        reverse_idx[i] = reverse_idx[j]
 #        print reverse_idx
 
         # ... triangles treatment
@@ -345,7 +362,7 @@ class bezier_patch(object):
                 i_pos += 1
         return value
 
-    def plot(self):
+    def plot(self, show_triangles=True, show_values=False):
         triangles = self.unique_triangles
         points = self.unique_points
 
@@ -355,12 +372,14 @@ class bezier_patch(object):
         # Create the Triangulation; no triangles so Delaunay triangulation created.
         triang = tri.Triangulation(x, y, triangles)
 
-        z = np.zeros_like(x)
-        for i in range(0, z.shape[0]):
-            z[i] = self.__call__([x[i], y[i]])
-        plt.tripcolor(triang, z, shading='gouraud', cmap=plt.cm.rainbow)
+        if show_values:
+            z = np.zeros_like(x)
+            for i in range(0, z.shape[0]):
+                z[i] = self.__call__([x[i], y[i]])
+            plt.tripcolor(triang, z, shading='gouraud', cmap=plt.cm.rainbow)
 
-#        plt.triplot(points[:,0], points[:,1], triangles, 'b-')
+        if show_triangles:
+            plt.triplot(points[:,0], points[:,1], triangles, lw=0.5)
 
 #        # Mask off unwanted triangles.
 #        xmid = x[triangles].mean(axis=1)

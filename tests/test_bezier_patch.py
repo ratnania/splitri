@@ -191,6 +191,15 @@ def make_triangles_5(degree):
     y = (radii*np.sin(angles)).flatten()
     z = (np.cos(radii)*np.cos(angles*3.0)).flatten()
 
+    # Create the Triangulation; no triangles so Delaunay triangulation created.
+    triang = tri.Triangulation(x, y)
+
+    # Mask off unwanted triangles.
+    xmid = x[triang.triangles].mean(axis=1)
+    ymid = y[triang.triangles].mean(axis=1)
+    mask = np.where(xmid*xmid + ymid*ymid < min_radius*min_radius, 1, 0)
+    triang.set_mask(mask)
+
     # ... create the tesselation, triangulation
     points = np.zeros((x.shape[0],2))
     points[:,0] = x
@@ -318,21 +327,22 @@ def test_3():
 
 def test_4():
     degree = 3
-    bzr = make_triangles_5(degree)
-#    bzr = make_triangles_4(degree)
 #    bzr = make_triangles_1(degree)
+#    bzr = make_triangles_2(degree)
 #    bzr = make_triangles_3(degree)
-#    bzr = make_triangles_square(10,degree)
+#    bzr = make_triangles_4(degree)
+###    bzr = make_triangles_5(degree)
+    bzr = make_triangles_square(10,degree)
 #    b_coeff = np.random.rand(bzr.shape)
     x = bzr.points[...,0]
     y = bzr.points[...,1]
     sin = np.sin ; pi = np.pi
 #    b_coeff = np.ones_like(bzr.points[...,0])
 #    b_coeff = sin(2*pi*x) #*sin(2*pi*y)
-    b_coeff = x**2 + y**2
+#    b_coeff = x**2 + y**2
 #    b_coeff = 16.*x*(1-x)*y*(1-y)
-#    b_coeff = np.zeros_like(x)
-#    b_coeff[0,...] = 1.
+    b_coeff = np.zeros_like(x)
+    b_coeff[0,0:3,...] = 1.
 
     bzr.set_b_coefficients(b_coeff)
 
@@ -353,7 +363,7 @@ def test_4():
 #    plt.ylim(*ylim)
 
 #    bzr.plot(nlevel=20, vmin=-0.1, vmax=2.1)
-    bzr.plot()
+    bzr.plot(show_triangles=True, show_values=True)
     plt.colorbar()
 
 #    triangles = bzr.unique_triangles
