@@ -4,6 +4,7 @@ from numpy import cos, sin, pi
 import numpy.linalg as la
 from scipy.spatial import Delaunay
 import matplotlib.tri as tri
+from matplotlib.tri import UniformTriRefiner
 import matplotlib.pyplot as plt
 import scipy
 from scipy.special import binom as sc_binom
@@ -392,7 +393,7 @@ class bezier_patch(object):
         return value
 
     def plot(self, show_triangles=True, show_values=False,
-             show_triangulation=True):
+             show_triangulation=True, subdiv=1):
         triangles = self.unique_triangles
         points = self.unique_points
 
@@ -406,7 +407,13 @@ class bezier_patch(object):
             z = np.zeros_like(x)
             for i in range(0, z.shape[0]):
                 z[i] = self.__call__([x[i], y[i]])
-            plt.tripcolor(triang, z, shading='gouraud', cmap=plt.cm.rainbow)
+            if subdiv==1:
+                plt.tripcolor(triang, z, shading='gouraud', cmap=plt.cm.rainbow)
+            else:
+                refiner = UniformTriRefiner(triang)
+                tri_refi, z_test_refi = refiner.refine_field(z, subdiv=subdiv)
+                plt.tripcolor(tri_refi, z_test_refi, shading='gouraud', cmap=plt.cm.rainbow)
+
 
         if show_triangles:
             plt.triplot(points[:,0], points[:,1], triangles, lw=0.5,

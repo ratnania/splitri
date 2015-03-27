@@ -312,7 +312,7 @@ def test_3():
     plt.show()
 
 def test_4():
-    degree = 3
+    degree = 2
 #    bzr = make_triangles_1(degree)
 #    bzr = make_triangles_4(degree)
 #    bzr = make_triangles_6(degree)
@@ -348,22 +348,48 @@ def test_4():
     plt.colorbar()
     plt.show()
 
+def test_boxspline_1():
+    degree = 2
+    bzr = make_triangles_square_boxspline_I(6,degree)
+    bzr.update()
+
+    x = bzr.points[...,0]
+    y = bzr.points[...,1]
+
+#    print bzr.find_simplex([0.75, 0.7])
+#    print bzr.find_simplex([0.65, 0.5])
+
+    b_coeff = np.zeros_like(x)
+    print b_coeff.shape
+
+    b_coeff[34,0:6] = [1.,1.,1.,1.,1.,1.]
+#    b_coeff[34,0:6] = [1.,2.,1.,1.,1.,0.]
+#    b_coeff[27,0:6] = [1.,2.,1.,1.,1.,0.]
+#    b_coeff[27,0:6] = [0.,1.,1.,1.,2.,1.]
+
+    bzr.set_b_coefficients(b_coeff)
+
+
+    plt.figure()
+#    plt.axis('off')
+#    plt.gca().set_aspect('equal')
+#    xlim = [-2.2, 2.2]
+#    ylim = [-2.2, 2.2]
+#    plt.xlim(*xlim)
+#    plt.ylim(*ylim)
+
+#    bzr.plot(nlevel=20, vmin=-0.1, vmax=2.1)
+    bzr.plot(show_triangles=True, show_values=True,
+             show_triangulation=True,subdiv=3)
+
+    plt.colorbar()
+    plt.show()
+
 #########################################################
 if __name__ == "__main__":
 #    test_1()
 #    test_2()
 #    test_3()
-    test_4()
+#    test_4()
+    test_boxspline_1()
 
-#def unique(a):
-#    order = np.lexsort(a.T)
-#    a = a[order]
-#    diff = np.diff(a, axis=0)
-#    ui = np.ones(len(a), 'bool')
-#    ui[1:] = (diff != 0).any(axis=1)
-#    return diff, ui, a[ui]
-#
-#def unique_rows(a):
-#    a = np.ascontiguousarray(a)
-#    unique_a = np.unique(a.view([('', a.dtype)]*a.shape[1]))
-#    return unique_a.view(a.dtype).reshape((unique_a.shape[0], a.shape[1])), unique_a
