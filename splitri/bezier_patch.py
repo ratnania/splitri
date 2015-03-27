@@ -26,7 +26,7 @@ class bezier_patch(object):
         # B = vertices[i,1,:]
         # C = vertices[i,2,:]
         self._array     = None
-        self._triangles = []
+        self._local_triangles = []
         self._all_triangles = []
         self._n_patchs  = None
 
@@ -82,12 +82,24 @@ class bezier_patch(object):
         return self._array[:,:,self.dim+1]
 
     @property
-    def triangles(self):
-        return self._triangles
+    def local_triangles(self):
+        return self._local_triangles
 
     @property
     def all_triangles(self):
         return self._all_triangles
+
+    @property
+    def unique_points(self):
+        return self._unique_points
+
+    @property
+    def unique_points_indices(self):
+        return self._unique_points_idx
+
+    @property
+    def unique_triangles(self):
+        return self._unique_triangles
 
     @property
     def edge(self, face):
@@ -165,7 +177,7 @@ class bezier_patch(object):
                 self._array[T_id, ...] = b_net
 
     def _create_triangulation(self):
-        self._triangles = []
+        self._local_triangles = []
         self._all_triangles = []
         for T_id in range(0, self.n_patchs):
             loc_triangles = []
@@ -188,10 +200,10 @@ class bezier_patch(object):
     #                print "DOWN ", [I1, I2, I3]
                     loc_triangles.append([I1, I2, I3])
             loc_triangles = np.array(loc_triangles)
-            self._triangles.append(loc_triangles)
+            self._local_triangles.append(loc_triangles)
             n_tri = T_id * self.shape
             self._all_triangles.append(loc_triangles+n_tri)
-        self._triangles = np.array(self._triangles)
+        self._local_triangles = np.array(self._local_triangles)
         self._all_triangles = np.array(self._all_triangles)
 
     def set_b_coefficients(self, control):
@@ -229,6 +241,40 @@ class bezier_patch(object):
         U = [0.]*(degree+1) + [1.]*(degree+1)
         nrb = NURBS([U], points)
         return nrb
+
+    def update(self):
+        """
+        computes unique vertices for the B-net
+        """
+        # ... points treatment
+        points = self.points
+        x_size = np.asarray(points.shape[:-1]).prod()
+        A = np.zeros((x_size, points.shape[-1]))
+        for i in range(0, points.shape[-1]):
+            A[:, i] = points[...,i].reshape(x_size)
+        a = np.ascontiguousarray(A)
+        unique_a, idx = np.unique(a.view([('', a.dtype)]*a.shape[1]), return_index=True)
+        self._unique_points = unique_a.view(a.dtype).reshape((unique_a.shape[0],a.shape[1]))
+        self._unique_points_idx = idx
+
+        # ... reverse indices
+        reverse_idx = -np.ones(x_size, dtype=np.int32)
+        for i in range(0, x_size):
+            try:
+                reverse_idx[i] = list(idx).index(i)
+            except:
+                for j in range(0, a.shape[0]):
+                    if np.linalg.norm(a[i]-a[j]) < 1.e-7:
+                        reverse_idx[i] = reverse_idx[j]
+#        print reverse_idx
+
+        # ... triangles treatment
+        triangles = self.all_triangles
+        x_size = np.asarray(triangles.shape[:-1]).prod()
+        B = np.zeros((x_size, triangles.shape[-1]), dtype=np.int32)
+        for i in range(0, triangles.shape[-1]):
+            B[:, i] = reverse_idx[triangles[...,i].reshape(x_size)]
+        self._unique_triangles = B
 
     def translate(self, displ, axis=None):
         displ = np.asarray(displ, dtype='d')
@@ -300,23 +346,21 @@ class bezier_patch(object):
         return value
 
     def plot(self):
-        points    = []
-        for T_id in range(0, self.n_patchs):
-            for loc_id in range(0, self.points.shape[1]):
-                points.append(list(self.points[T_id, loc_id, ...]))
-        points    = np.array(points)
+        triangles = self.unique_triangles
+        points = self.unique_points
 
         x = points[:,0]
         y = points[:,1]
 
         # Create the Triangulation; no triangles so Delaunay triangulation created.
-        triang = tri.Triangulation(x, y)
-        triangles = triang.triangles
+        triang = tri.Triangulation(x, y, triangles)
 
         z = np.zeros_like(x)
         for i in range(0, z.shape[0]):
             z[i] = self.__call__([x[i], y[i]])
         plt.tripcolor(triang, z, shading='gouraud', cmap=plt.cm.rainbow)
+
+#        plt.triplot(points[:,0], points[:,1], triangles, 'b-')
 
 #        # Mask off unwanted triangles.
 #        xmid = x[triangles].mean(axis=1)
