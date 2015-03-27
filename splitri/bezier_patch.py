@@ -110,6 +110,13 @@ class bezier_patch(object):
         return self._unique_triangles
 
     @property
+    def triangulation(self):
+        """
+        returns the initial triangulation, without the B-nets
+        """
+        return self._triangulation
+
+    @property
     def edge(self, face):
         return 1
 
@@ -370,7 +377,8 @@ class bezier_patch(object):
                 i_pos += 1
         return value
 
-    def plot(self, show_triangles=True, show_values=False):
+    def plot(self, show_triangles=True, show_values=False,
+             show_triangulation=True):
         triangles = self.unique_triangles
         points = self.unique_points
 
@@ -388,6 +396,12 @@ class bezier_patch(object):
 
         if show_triangles:
             plt.triplot(points[:,0], points[:,1], triangles, lw=0.5)
+
+        if show_triangulation:
+            triangles = self.triangulation.triangles
+            x         = self.triangulation.x
+            y         = self.triangulation.y
+            plt.triplot(x, y, triangles, 'b-')
 
 #        # Mask off unwanted triangles.
 #        xmid = x[triangles].mean(axis=1)

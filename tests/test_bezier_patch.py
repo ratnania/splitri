@@ -273,7 +273,7 @@ def test_4():
 #    bzr = make_triangles_4(degree)
 ###    bzr = make_triangles_5(degree)
     bzr = make_triangles_collela(20,degree)
-#    bzr = make_triangles_square(10,degree)
+#    bzr = make_triangles_square(3,degree)
 #    b_coeff = np.random.rand(bzr.shape)
     x = bzr.points[...,0]
     y = bzr.points[...,1]
@@ -297,13 +297,9 @@ def test_4():
 #    plt.ylim(*ylim)
 
 #    bzr.plot(nlevel=20, vmin=-0.1, vmax=2.1)
-    bzr.plot(show_triangles=True, show_values=False)
+    bzr.plot(show_triangles=True, show_values=False, show_triangulation=True)
+
 #    plt.colorbar()
-
-#    triangles = bzr.unique_triangles
-#    points = bzr.unique_points
-#    plt.triplot(points[:,0], points[:,1], triangles, 'b-')
-
     plt.show()
 
 #########################################################
