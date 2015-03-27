@@ -172,6 +172,35 @@ def make_triangles_6(degree):
 
     return bezier_patch(nodes, triangles=tri, degree=degree)
 
+def make_triangles_square_boxspline_I(n,degree):
+    t = np.linspace(0.,1.,n)
+    X,Y=np.meshgrid(t,t)
+    x = X.reshape(X.size)
+    y = Y.reshape(Y.size)
+
+    i_t = range(0,n)
+    i_X,i_Y = np.array(np.meshgrid(i_t,i_t), dtype=np.int32)
+
+    i_x = i_X.reshape(i_X.size)
+    i_y = i_Y.reshape(i_Y.size)
+
+    ids = i_x + i_y*n
+
+    triangles = []
+    for j in range(0,n-1):
+        for i in range(0,n-1):
+            I1 = i+j*n ; I2 = i+1+j*n ; I3 = i+1+(j+1)*n
+            T = [I1,I2,I3]
+            triangles.append(T)
+
+            I1 = i+j*n ; I2 = i+(j+1)*n ; I3 = i+1+(j+1)*n
+            T = [I1,I2,I3]
+            triangles.append(T)
+
+    nodes = np.zeros((x.shape[0], 2))
+    nodes[:,0] = x ; nodes[:,1] = y
+
+    return bezier_patch(nodes, degree=degree)
 def test_1():
 #    A_net = make_triangle_1(3)
     A_net = make_triangle_2()
@@ -283,13 +312,14 @@ def test_3():
     plt.show()
 
 def test_4():
-    degree = 4
+    degree = 3
 #    bzr = make_triangles_1(degree)
 #    bzr = make_triangles_4(degree)
-    bzr = make_triangles_6(degree)
+#    bzr = make_triangles_6(degree)
 ###    bzr = make_triangles_5(degree)
 #    bzr = make_triangles_collela(20,degree)
 #    bzr = make_triangles_square(3,degree)
+    bzr = make_triangles_square_boxspline_I(6,degree)
 #    b_coeff = np.random.rand(bzr.shape)
     x = bzr.points[...,0]
     y = bzr.points[...,1]
