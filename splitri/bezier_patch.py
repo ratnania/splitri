@@ -16,6 +16,7 @@ def barycentric_coords(vertices, point):
     v = np.dot(la.inv(T), np.array(point)-vertices[-1])
     v.resize(len(vertices))
     v[-1] = 1-v.sum()
+#    print v
     return v
 # ...
 
@@ -236,15 +237,20 @@ class bezier_patch(object):
         bzr._triangles = self.triangles
         return bzr
 
-    def find_simplex(self, xyz):
+    def find_simplex(self, xyz, tol=1.e-7):
         """
         returns the id of the triangle that contains the point xyz
         """
 #        c = barycentric_coords(self.vertices, xyz)
         # TODO must be done using numpy arrays without a loop
+#        print "=========", xyz
         for i in range(0, self.vertices.shape[0]):
-            c = barycentric_coords(self.vertices[i,:], xyz)
-            if np.array(c).prod() >= 0:
+#            print self.vertices[i,...]
+            c = barycentric_coords(self.vertices[i,...], xyz)
+#            k = np.where(c>=0)
+#            i = k[0].min()
+#            print c
+            if (c[0]+tol >= 0.) and (c[1]+tol >= 0.) and (c[2]+tol >= 0.):
                 return i
         return None
 
@@ -363,10 +369,18 @@ class bezier_patch(object):
         """
         A = np.array(xy)
         T_id = self.find_simplex(A)
+        if T_id is None:
+            print("Warning: number out of domain")
+            for i in range(0, self.vertices.shape[0]):
+    #            print self.vertices[i,...]
+                c = barycentric_coords(self.vertices[i,...], A)
+                print c
+            return None
         vertices = self.vertices[T_id,...]
         coeffs = self.control[T_id,...]
         c = barycentric_coords(vertices, A)
 
+#        print c
         value = 0.
         i_pos = 0
         for i in range(0, self.degree+1):
@@ -395,13 +409,14 @@ class bezier_patch(object):
             plt.tripcolor(triang, z, shading='gouraud', cmap=plt.cm.rainbow)
 
         if show_triangles:
-            plt.triplot(points[:,0], points[:,1], triangles, lw=0.5)
+            plt.triplot(points[:,0], points[:,1], triangles, lw=0.5,
+                        color='white')
 
         if show_triangulation:
             triangles = self.triangulation.triangles
             x         = self.triangulation.x
             y         = self.triangulation.y
-            plt.triplot(x, y, triangles, 'b-')
+            plt.triplot(x, y, triangles, lw=0.5)
 
 #        # Mask off unwanted triangles.
 #        xmid = x[triangles].mean(axis=1)
