@@ -362,7 +362,16 @@ def test_boxspline_1():
     b_coeff = np.zeros_like(x)
     print b_coeff.shape
 
-    b_coeff[34,0:6] = [1.,1.,1.,1.,1.,1.]
+#    b_coeff[:10,0:6] = [1.,1.,1.,1.,1.,1.]
+#    b_coeff[0,0:6] = [1.,1.,1.,1.,1.,1.]
+
+#    b_coeff[0:10,0] = 1.
+#    plt.plot(x[0,0:6], y[0,0:6],"ob")
+
+    b_coeff[10:20,0] = 1.
+    plt.plot(x[10:20,0:6], y[10:20,0:6],"ob")
+
+#    b_coeff[34,0:6] = [1.,1.,1.,1.,1.,1.]
 #    b_coeff[34,0:6] = [1.,2.,1.,1.,1.,0.]
 #    b_coeff[27,0:6] = [1.,2.,1.,1.,1.,0.]
 #    b_coeff[27,0:6] = [0.,1.,1.,1.,2.,1.]
@@ -370,7 +379,7 @@ def test_boxspline_1():
     bzr.set_b_coefficients(b_coeff)
 
 
-    plt.figure()
+#    plt.figure()
 #    plt.axis('off')
 #    plt.gca().set_aspect('equal')
 #    xlim = [-2.2, 2.2]
