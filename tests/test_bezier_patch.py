@@ -200,6 +200,15 @@ def make_triangles_square_boxspline_I(n,degree):
     nodes = np.zeros((x.shape[0], 2))
     nodes[:,0] = x ; nodes[:,1] = y
 
+    triang = tri.Triangulation(x,y,triangles)
+#    plt.triplot(x,y,triang.triangles)
+#    xlim = [-.2, 1.2]
+#    ylim = [-.2, 1.2]
+#    plt.xlim(*xlim)
+#    plt.ylim(*ylim)
+#    plt.show()
+#    import sys; sys.exit(0)
+
     return bezier_patch(nodes, degree=degree)
 def test_1():
 #    A_net = make_triangle_1(3)
@@ -349,8 +358,9 @@ def test_4():
     plt.show()
 
 def test_boxspline_1():
-    degree = 2
-    bzr = make_triangles_square_boxspline_I(6,degree)
+    n = 4
+    degree = 5
+    bzr = make_triangles_square_boxspline_I(n,degree)
     bzr.update()
 
     x = bzr.points[...,0]
@@ -369,7 +379,7 @@ def test_boxspline_1():
 #    plt.plot(x[0,0:6], y[0,0:6],"ob")
 
     b_coeff[10:20,0] = 1.
-    plt.plot(x[10:20,0:6], y[10:20,0:6],"ob")
+    plt.plot(x[10:20,:], y[10:20,:],"ob")
 
 #    b_coeff[34,0:6] = [1.,1.,1.,1.,1.,1.]
 #    b_coeff[34,0:6] = [1.,2.,1.,1.,1.,0.]
@@ -377,6 +387,8 @@ def test_boxspline_1():
 #    b_coeff[27,0:6] = [0.,1.,1.,1.,2.,1.]
 
     bzr.set_b_coefficients(b_coeff)
+
+    print bzr.unique_points.shape
 
 
 #    plt.figure()
