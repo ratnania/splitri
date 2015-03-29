@@ -9,12 +9,24 @@ from splitri.bezier import Bezier
 
 def test_1():
     L = 2.
-    n = 15
+    n = 30
     degree = 3
 
     triang = collela(n)
+#    Bzr = Bezier(degree, triang.x, triang.y, triang.triangles)
 
-    Bzr = Bezier(degree, triang.x, triang.y, triang.triangles)
+    triangles = []
+    for j in range(0,n-1):
+        for i in range(0,n-1):
+            I1 = i+j*n ; I2 = i+1+j*n ; I3 = i+1+(j+1)*n
+            T = [I1,I2,I3]
+            triangles.append(T)
+
+            I1 = i+j*n ; I2 = i+(j+1)*n ; I3 = i+1+(j+1)*n
+            T = [I1,I2,I3]
+            triangles.append(T)
+
+    Bzr = Bezier(degree, triang.x, triang.y, triangles)
 
     P = [0.5, 0.35]
     plt.plot(P[0], P[1], "or")
@@ -103,7 +115,7 @@ def test_4():
 
 #######################################################
 if __name__ == "__main__":
-#    test_1()
+    test_1()
 #    test_2()
 #    test_3()
-    test_4()
+#    test_4()
