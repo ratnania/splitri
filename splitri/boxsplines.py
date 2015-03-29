@@ -325,7 +325,6 @@ if __name__ == "__main__":
 #    e = [2,2,1] ; degree = 3
 #    e = [2,2,2] ; degree = 4
 
-#    tri_box = triangulation_II(n, degree)
 
     if e == [2,1,1]:
         tri_box = triangulation_I(n, degree)
@@ -337,21 +336,23 @@ if __name__ == "__main__":
         tri_box = triangulation_I(n, degree)
         Box     = BoxSpline_222(tri_box)
 
-    title = "Box-Splines $B_{"+str(e[0])+str(e[1])+str(e[2])+"}$"
+    tri_box = triangulation_II(n, degree)
 
-#    plt.tripcolor(triang_ref, B_coeff, shading='gouraud', cmap=plt.cm.rainbow)
-
-    refiner = UniformTriRefiner(tri_box.triang_ref)
-    tri_refi, z_test_refi = refiner.refine_field(Box.b_coeff, subdiv=4)
-    plt.tripcolor(tri_refi, z_test_refi, shading='gouraud', cmap=plt.cm.rainbow) ; plt.colorbar()
+#    title = "Box-Splines $B_{"+str(e[0])+str(e[1])+str(e[2])+"}$"
+#
+##    plt.tripcolor(triang_ref, B_coeff, shading='gouraud', cmap=plt.cm.rainbow)
+#
+#    refiner = UniformTriRefiner(tri_box.triang_ref)
+#    tri_refi, z_test_refi = refiner.refine_field(Box.b_coeff, subdiv=4)
+#    plt.tripcolor(tri_refi, z_test_refi, shading='gouraud', cmap=plt.cm.rainbow) ; plt.colorbar()
+#
+#    plt.triplot(tri_box.triang, '-', lw=0.75, color="red")
+#    plt.triplot(tri_box.triang_ref, lw=0.5, color="white")
+#    plt.title(title)
+#    plt.show()
 
     plt.triplot(tri_box.triang, '-', lw=0.75, color="red")
-    plt.triplot(tri_box.triang_ref, lw=0.5, color="white")
-    plt.title(title)
+    plt.triplot(tri_box.triang_ref, lw=0.5, color="blue")
     plt.show()
-
-#    plt.triplot(triang, '-', lw=0.75, color="red")
-#    plt.triplot(triang_ref, lw=0.5, color="blue")
-#    plt.show()
 
 
