@@ -1,8 +1,6 @@
-
 # -*- coding: UTF-8 -*-
 import numpy as np
 from numpy import cos, sin, pi
-import numpy.linalg as la
 from scipy.spatial import Delaunay
 import matplotlib.tri as tri
 import matplotlib.pyplot as plt
@@ -90,7 +88,7 @@ class triangulation_boxplines(object):
     def L(self):
         return self._L
 
-    def find_vertex(self, P):
+    def find_vertex_domain(self, P):
         x_ref = self.triang_ref.x
         y_ref = self.triang_ref.y
 
@@ -194,7 +192,7 @@ class BoxSpline_211(BoxSpline):
         list_P.append(center+np.array([-dx,-dy])) ;  list_v.append(1.)
 
         for P,v in zip(list_P, list_v):
-            i = triang.find_vertex(P)
+            i = triang.find_vertex_domain(P)
             self._b_coeff[i] = v
         self._b_coeff /= 2.
 
@@ -244,7 +242,7 @@ class BoxSpline_221(BoxSpline):
 
 
         for P,v in zip(list_P, list_v):
-            i = triang.find_vertex(P)
+            i = triang.find_vertex_domain(P)
             self._b_coeff[i] = v
         self._b_coeff /= 6.
 
@@ -254,7 +252,7 @@ class BoxSpline_222(BoxSpline):
         if not isinstance(triang, triangulation_I):
             raise ValueError("Expected a Triangulation of type I object")
 
-        assert (triang.degree==2)
+        assert (triang.degree==4)
         BoxSpline.__init__(self, triang)
 
         dx = triang.dx / triang.degree  ; dy = triang.dy / triang.degree
@@ -319,7 +317,7 @@ class BoxSpline_222(BoxSpline):
             list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
 
         for P,v in zip(list_P, list_v):
-            i = triang.find_vertex(P)
+            i = triang.find_vertex_domain(P)
             self._b_coeff[i] = v
         self._b_coeff /= 24.
 
@@ -361,7 +359,7 @@ class BoxSpline_1111(BoxSpline):
             list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
 
         for P,v in zip(list_P, list_v):
-            i = triang.find_vertex(P)
+            i = triang.find_vertex_domain(P)
             self._b_coeff[i] = v
         # TODO scaling to be corrected
         self._b_coeff /= 2.
@@ -404,60 +402,9 @@ class BoxSpline_2111(BoxSpline):
             list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
 
         for P,v in zip(list_P, list_v):
-            i = triang.find_vertex(P)
+            i = triang.find_vertex_domain(P)
             self._b_coeff[i] = v
 
         self._b_coeff /= 48.
-
-#######################################################
-
-if __name__ == "__main__":
-    L = 2.
-    n = 9
-
-#    e = [2,1,1] ; degree = 2
-#    e = [2,2,1] ; degree = 3
-#    e = [2,2,2] ; degree = 4
-
-    e = [1,1,1,1] ; degree = 2
-
-    plot_field = True
-
-
-    if e == [2,1,1]:
-        tri_box = triangulation_I(n, degree)
-        Box     = BoxSpline_211(tri_box)
-    if e == [2,2,1]:
-        tri_box = triangulation_I(n, degree)
-        Box     = BoxSpline_221(tri_box)
-    if e == [2,2,2]:
-        tri_box = triangulation_I(n, degree)
-        Box     = BoxSpline_222(tri_box)
-
-
-    if e == [1,1,1,1]:
-        tri_box = triangulation_II(n, degree)
-        Box     = BoxSpline_1111(tri_box)
-
-    if plot_field:
-        str_e = ""
-        for _e in e:
-            str_e+=str(_e)
-        title = "Box-Splines $B_{"+str_e+"}$"
-
-    #    plt.tripcolor(triang_ref, B_coeff, shading='gouraud', cmap=plt.cm.rainbow)
-
-        refiner = UniformTriRefiner(tri_box.triang_ref)
-        tri_refi, z_test_refi = refiner.refine_field(Box.b_coeff, subdiv=4)
-        plt.tripcolor(tri_refi, z_test_refi, shading='gouraud', cmap=plt.cm.rainbow) ; plt.colorbar()
-
-        plt.triplot(tri_box.triang, '-', lw=0.75, color="red")
-        plt.triplot(tri_box.triang_ref, lw=0.5, color="white")
-        plt.title(title)
-        plt.show()
-    else:
-        plt.triplot(tri_box.triang, '-', lw=0.75, color="red")
-        plt.triplot(tri_box.triang_ref, lw=0.5, color="blue")
-        plt.show()
 
 

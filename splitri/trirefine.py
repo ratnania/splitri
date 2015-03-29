@@ -244,7 +244,7 @@ class BezierTriangulationConstructor(object):
         # ... reverse indices
 #        print idx
         reverse_idx = -np.ones(x_size, dtype=np.int32)
-        print ">>> Begin"
+#        print ">>> Begin"
 #        print a
         for i in range(0, x_size):
             itemindex = np.where(idx==i)[0]
@@ -255,7 +255,7 @@ class BezierTriangulationConstructor(object):
                 ll_condition = np.logical_and(a[i,0]== a[:, 0], a[i,1]== a[:, 1])
                 k = np.where(ll_condition)
                 reverse_idx[i] = reverse_idx[k[0][0]]
-        print "<<< End"
+#        print "<<< End"
 #        print reverse_idx
 
         # ... triangles treatment
@@ -307,41 +307,5 @@ class UniformBezierTriRefiner(TriRefiner):
         else:
             return tri.Triangulation(x,y,triangles), bzr.triangles_ancestors
 
-#######################################################
-if __name__ == "__main__":
-
-    def make_triangles_collela(n,degree):
-        # ...
-        u = np.linspace(0.,1.,n)
-        v = np.linspace(0.,1.,n)
-
-        U,V = np.meshgrid(u,v)
-
-        u = U.reshape(U.size)
-        v = V.reshape(V.size)
-        # ...
-
-        # ...
-        eps = 0.1
-        k1 = 1. ; k2 = 1.
-        x = 2*(u + eps * sin(2*pi*k1*u) * sin(2*pi*k2*v)) -1.
-        y = 2*(v + eps * sin(2*pi*k1*u) * sin(2*pi*k2*v)) - 1.
-        # ...
-
-        return tri.Triangulation(x, y)
-
-    L = 2.
-    n = 9
-    degree = 3
-
-    triang = make_triangles_collela(n, degree)
-
-    refiner = UniformBezierTriRefiner(triang)
-    triang_ref, ancestors = refiner.refine_triangulation(degree=degree,
-                                                         ancestors=True)
-
-    plt.triplot(triang, '-', lw=0.75, color="red")
-    plt.triplot(triang_ref, lw=0.5, color="blue")
-    plt.show()
 
 

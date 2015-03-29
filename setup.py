@@ -28,9 +28,13 @@ setup_args = dict(
 
 packages=[  'splitri' \
           , 'splitri.core' \
+          , 'splitri.gallery' \
+          , 'splitri.utils' \
          ]
 package_dir={  'splitri': 'splitri'\
               ,'caid.core':  'caid/core' \
+              ,'caid.gallery':  'caid/gallery' \
+              ,'caid.utils':  'caid/utils' \
               ,}
 
 ext_modules  = [ \
