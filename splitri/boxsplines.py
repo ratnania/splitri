@@ -175,12 +175,14 @@ class BoxSpline(object):
 
 
 class BoxSpline_211(BoxSpline):
-    def __init__(self, triang_I, center=[0.,0.]):
+    def __init__(self, triang, center=[0.,0.]):
+        if not isinstance(triang, triangulation_I):
+            raise ValueError("Expected a Triangulation of type I object")
 
-        assert (triang_I.degree==2)
-        BoxSpline.__init__(self, triang_I)
+        assert (triang.degree==2)
+        BoxSpline.__init__(self, triang)
 
-        dx = triang_I.dx / triang_I.degree  ; dy = triang_I.dy / triang_I.degree
+        dx = triang.dx / triang.degree  ; dy = triang.dy / triang.degree
 
         center = np.asarray(center) + np.array([dx,0.])
         list_P = [center]                         ;  list_v = [2.]
@@ -192,17 +194,19 @@ class BoxSpline_211(BoxSpline):
         list_P.append(center+np.array([-dx,-dy])) ;  list_v.append(1.)
 
         for P,v in zip(list_P, list_v):
-            i = triang_I.find_vertex(P)
+            i = triang.find_vertex(P)
             self._b_coeff[i] = v
         self._b_coeff /= 2.
 
 class BoxSpline_221(BoxSpline):
-    def __init__(self, triang_I, center=[0.,0.]):
+    def __init__(self, triang, center=[0.,0.]):
+        if not isinstance(triang, triangulation_I):
+            raise ValueError("Expected a Triangulation of type I object")
 
-        assert (triang_I.degree==3)
-        BoxSpline.__init__(self, triang_I)
+        assert (triang.degree==3)
+        BoxSpline.__init__(self, triang)
 
-        dx = triang_I.dx / triang_I.degree  ; dy = triang_I.dy / triang_I.degree
+        dx = triang.dx / triang.degree  ; dy = triang.dy / triang.degree
 
         center = np.asarray(center)
 
@@ -240,18 +244,20 @@ class BoxSpline_221(BoxSpline):
 
 
         for P,v in zip(list_P, list_v):
-            i = triang_I.find_vertex(P)
+            i = triang.find_vertex(P)
             self._b_coeff[i] = v
         self._b_coeff /= 6.
 
 
 class BoxSpline_222(BoxSpline):
-    def __init__(self, triang_I, center=[0.,0.]):
+    def __init__(self, triang, center=[0.,0.]):
+        if not isinstance(triang, triangulation_I):
+            raise ValueError("Expected a Triangulation of type I object")
 
-        assert (triang_I.degree==2)
-        BoxSpline.__init__(self, triang_I)
+        assert (triang.degree==2)
+        BoxSpline.__init__(self, triang)
 
-        dx = triang_I.dx / triang_I.degree  ; dy = triang_I.dy / triang_I.degree
+        dx = triang.dx / triang.degree  ; dy = triang.dy / triang.degree
 
         center = np.asarray(center)
 
@@ -313,17 +319,109 @@ class BoxSpline_222(BoxSpline):
             list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
 
         for P,v in zip(list_P, list_v):
-            i = triang_I.find_vertex(P)
+            i = triang.find_vertex(P)
             self._b_coeff[i] = v
         self._b_coeff /= 24.
+
+
+class BoxSpline_1111(BoxSpline):
+    def __init__(self, triang, center=[0.,0.]):
+        if not isinstance(triang, triangulation_II):
+            raise ValueError("Expected a Triangulation of type II object")
+
+        assert (triang.degree==2)
+        BoxSpline.__init__(self, triang)
+
+        N = (2*triang.degree)
+
+        dx = triang.dx / N ; dy = triang.dy / N
+
+        center = np.asarray(center)
+
+        list_P = []                               ;  list_v = []
+        # 1st column
+        i = -1
+        for j,v in zip( [ 1, 2] \
+                       ,[1.,1.]):
+            list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
+        # 2nd column
+        i = 0
+        for j,v in zip( [0, 1, 2, 3] \
+                       ,[1.,2.,2.,1.]):
+            list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
+        # 3rd column
+        i = 1
+        for j,v in zip( [0, 1, 2, 3] \
+                       ,[1.,2.,2.,1.]):
+            list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
+        # 4th column
+        i = 2
+        for j,v in zip( [ 1, 2] \
+                       ,[1.,1.]):
+            list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
+
+        for P,v in zip(list_P, list_v):
+            i = triang.find_vertex(P)
+            self._b_coeff[i] = v
+        # TODO scaling to be corrected
+        self._b_coeff /= 2.
+
+
+class BoxSpline_2111(BoxSpline):
+    def __init__(self, triang, center=[0.,0.]):
+        if not isinstance(triang, triangulation_II):
+            raise ValueError("Expected a Triangulation of type II object")
+
+        assert (triang.degree==3)
+        BoxSpline.__init__(self, triang)
+
+        N = 2*triang.degree + 1
+
+        dx = triang.dx / N ; dy = triang.dy / N
+
+        center = np.asarray(center)
+
+        list_P = []                               ;  list_v = []
+        # 1st column
+        i = -1
+        for j,v in zip( [ 1, 2] \
+                       ,[1.,1.]):
+            list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
+        # 2nd column
+        i = 0
+        for j,v in zip( [0, 1, 2, 3] \
+                       ,[1.,2.,2.,1.]):
+            list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
+        # 3rd column
+        i = 1
+        for j,v in zip( [0, 1, 2, 3] \
+                       ,[1.,2.,2.,1.]):
+            list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
+        # 4th column
+        i = 2
+        for j,v in zip( [ 1, 2] \
+                       ,[1.,1.]):
+            list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
+
+        for P,v in zip(list_P, list_v):
+            i = triang.find_vertex(P)
+            self._b_coeff[i] = v
+
+        self._b_coeff /= 48.
+
 #######################################################
 
 if __name__ == "__main__":
     L = 2.
     n = 9
-    e = [2,1,1] ; degree = 2
+
+#    e = [2,1,1] ; degree = 2
 #    e = [2,2,1] ; degree = 3
 #    e = [2,2,2] ; degree = 4
+
+    e = [1,1,1,1] ; degree = 2
+
+    plot_field = True
 
 
     if e == [2,1,1]:
@@ -336,23 +434,30 @@ if __name__ == "__main__":
         tri_box = triangulation_I(n, degree)
         Box     = BoxSpline_222(tri_box)
 
-    tri_box = triangulation_II(n, degree)
 
-#    title = "Box-Splines $B_{"+str(e[0])+str(e[1])+str(e[2])+"}$"
-#
-##    plt.tripcolor(triang_ref, B_coeff, shading='gouraud', cmap=plt.cm.rainbow)
-#
-#    refiner = UniformTriRefiner(tri_box.triang_ref)
-#    tri_refi, z_test_refi = refiner.refine_field(Box.b_coeff, subdiv=4)
-#    plt.tripcolor(tri_refi, z_test_refi, shading='gouraud', cmap=plt.cm.rainbow) ; plt.colorbar()
-#
-#    plt.triplot(tri_box.triang, '-', lw=0.75, color="red")
-#    plt.triplot(tri_box.triang_ref, lw=0.5, color="white")
-#    plt.title(title)
-#    plt.show()
+    if e == [1,1,1,1]:
+        tri_box = triangulation_II(n, degree)
+        Box     = BoxSpline_1111(tri_box)
 
-    plt.triplot(tri_box.triang, '-', lw=0.75, color="red")
-    plt.triplot(tri_box.triang_ref, lw=0.5, color="blue")
-    plt.show()
+    if plot_field:
+        str_e = ""
+        for _e in e:
+            str_e+=str(_e)
+        title = "Box-Splines $B_{"+str_e+"}$"
+
+    #    plt.tripcolor(triang_ref, B_coeff, shading='gouraud', cmap=plt.cm.rainbow)
+
+        refiner = UniformTriRefiner(tri_box.triang_ref)
+        tri_refi, z_test_refi = refiner.refine_field(Box.b_coeff, subdiv=4)
+        plt.tripcolor(tri_refi, z_test_refi, shading='gouraud', cmap=plt.cm.rainbow) ; plt.colorbar()
+
+        plt.triplot(tri_box.triang, '-', lw=0.75, color="red")
+        plt.triplot(tri_box.triang_ref, lw=0.5, color="white")
+        plt.title(title)
+        plt.show()
+    else:
+        plt.triplot(tri_box.triang, '-', lw=0.75, color="red")
+        plt.triplot(tri_box.triang_ref, lw=0.5, color="blue")
+        plt.show()
 
 
