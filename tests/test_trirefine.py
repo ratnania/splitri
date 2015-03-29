@@ -9,7 +9,7 @@ from splitri.trirefine import *
 
 def test_1():
     L = 2.
-    n = 9
+    n = 15
     degree = 3
 
     triang = collela(n)
