@@ -16,14 +16,15 @@ def test_1():
     Bzr = Bezier(degree, triang.x, triang.y, triang.triangles)
 
     P = [0.5, 0.35]
-    plt.plot(P[0], P[1], "or")
-    T_id = Bzr.find_simplex(P)
+#    plt.plot(P[0], P[1], "or")
+#    T_id = Bzr.find_simplex(P)
+#
+#    plt.plot(Bzr.triang.x[Bzr.triang.triangles[T_id]] \
+#             , Bzr.triang.y[Bzr.triang.triangles[T_id]], "og")
 
-    plt.plot(Bzr.triang.x[Bzr.triang.triangles[T_id]] \
-             , Bzr.triang.y[Bzr.triang.triangles[T_id]], "og")
-
-    T_id = 0
-    Bzr. evaluate_on_triangle(P, T_id)
+    for T_id in range(0, 8):
+#        print ">>>>>>>>>>>>>> T ", T_id
+        Bzr.evaluate_on_triangle(P, T_id)
 
     plt.triplot(Bzr.triang, '-', lw=0.75, color="red")
     plt.triplot(Bzr.triang_ref, lw=0.5, color="blue")

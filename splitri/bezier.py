@@ -115,19 +115,22 @@ class Bezier(object):
         mask_ref = np.where(self.ancestors == T_id)
         triangles_ref = self.triang_ref.triangles[mask_ref]
 
+        x   = self.triang.x[self.triang.triangles[T_id]]
+        y   = self.triang.y[self.triang.triangles[T_id]]
+
+        a11 = x[0] - x[2] ; a21 = y[0] - y[2]
+        a12 = x[1] - x[2] ; a22 = y[1] - y[2]
+
+        delta = a11*a22-a12*a21
+
         list_i = [] ; list_j = []
         for T_ref_id in range(0, len(triangles_ref)):
-            x     = self.triang.x[self.triang.triangles[T_id]]
-            y     = self.triang.y[self.triang.triangles[T_id]]
-            x_ref = self.triang_ref.x[self.triang_ref.triangles[T_ref_id]]
-            y_ref = self.triang_ref.y[self.triang_ref.triangles[T_ref_id]]
-            a11 = x[0] - x[2]
-            a21 = x[1] - x[2]
-            a12 = y[0] - y[2]
-            a22 = y[1] - y[2]
-            delta = a11*a22-a12*a21
+            x_ref = self.triang_ref.x[triangles_ref[T_ref_id]]
+            y_ref = self.triang_ref.y[triangles_ref[T_ref_id]]
+
             X = x_ref - x[2]  ; Y = y_ref - y[2]
-            i = - X*a21 + Y*a11 ; j = - X*a22 + Y*a12
+
+            i = X*a22 - Y*a12 ; j = -( X*a21 - Y*a11)
             i /= delta        ; j /= delta
             i *= d            ; j *= d
             i = iround(i)     ; j = iround(j)
@@ -150,6 +153,7 @@ class Bezier(object):
         list_coeff = self.b_coeff[triangles_ref]
 
         list_i, list_j = self._compute_ij(T_id)
+#        print list_i, list_j
 
         x_size = 3*len(list_x_ref)
         A = np.zeros((x_size,2))
@@ -169,16 +173,13 @@ class Bezier(object):
 
 #        print IJ[:,0]
 #        print IJ[:,1]
-#
-#        for x_ref,y_ref in zip(list_x_ref, list_y_ref):
-#            plt.plot(x_ref,y_ref,"xr")
 
         value = 0.
-        for ij in range(0, IJ.shape[0]):
-            i = IJ[ij,0] ; j = IJ[ij,1]
-#            print ">W> ", i,j
-            bern = self._bernstein([i,j], x_bary)
-            value += bern * coeffs[ij]
+#        for ij in range(0, IJ.shape[0]):
+#            i = IJ[ij,0] ; j = IJ[ij,1]
+##            print ">W> ", i,j
+#            bern = self._bernstein([i,j], x_bary)
+#            value += bern * coeffs[ij]
         return value
 
     @property
