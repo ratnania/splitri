@@ -166,21 +166,39 @@ class Bezier(object):
         IJ[:,0] = np.array(list_i.reshape(x_size))
         IJ[:,1] = np.array(list_j.reshape(x_size))
 
+        x_ref  = np.array(list_x_ref.reshape(x_size))
+        y_ref  = np.array(list_y_ref.reshape(x_size))
         coeffs = np.array(list_coeff.reshape(x_size))
 
         IJ = IJ[idx,:]
         coeffs = coeffs[idx]
+        x_ref  = x_ref[idx]
+        y_ref  = y_ref[idx]
+        vertices = np.zeros((x_ref.shape[0],2))
+#        print x_ref
+#        print y_ref
+        vertices[:,0] = x_ref
+        vertices[:,1] = y_ref
 
 #        print IJ[:,0]
 #        print IJ[:,1]
 
-        value = 0.
-#        for ij in range(0, IJ.shape[0]):
-#            i = IJ[ij,0] ; j = IJ[ij,1]
-##            print ">W> ", i,j
-#            bern = self._bernstein([i,j], x_bary)
-#            value += bern * coeffs[ij]
-        return value
+        value    = 0.
+        position = np.zeros(2)
+        for ij in range(0, IJ.shape[0]):
+            i = IJ[ij,0] ; j = IJ[ij,1]
+
+            bern = self._bernstein([i,j], x_bary)
+
+            value    += bern * coeffs[ij]
+            position += bern * vertices[ij]
+
+        # test if the position is the current triangle
+        if (self.find_simplex(position) == T_id):
+            print ">>> warning: coordinates ", x_bary, " out of triangle ", T_id
+            print "<<< computed position is ", position
+
+        return value, position
 
     @property
     def triang(self):

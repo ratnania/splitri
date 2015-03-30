@@ -20,7 +20,6 @@ class bernstein(object):
         """
         x_barycentric = np.array(x_barycentric)
         k = self.degree - ij[0] - ij[1]
-#        print "ijk ", ij, k
         w = 1. - x_barycentric.sum()
 
         B = x_barycentric[0]**ij[0] \
