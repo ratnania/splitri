@@ -9,6 +9,7 @@ import matplotlib.pyplot as plt
 from .bernstein import *
 from .utils.triangle import barycentric_coords
 from .trirefine import UniformBezierTriRefiner
+from .utils.utils import iround
 
 
 class Bezier(object):
@@ -23,6 +24,9 @@ class Bezier(object):
         self._create_bezier_patch()
 
         self._b_coeff = np.zeros_like(self.triang_ref.x)
+
+        for i in range(0, 5):
+            self._compute_ij(i)
 
     @property
     def b_coeff(self):
@@ -79,6 +83,81 @@ class Bezier(object):
             if (c[0]+tol >= 0.) and (c[1]+tol >= 0.) and (c[0]+c[1] <= 1.+tol):
                 return i
         return None
+
+    def _compute_ij(self, T_ref_id):
+        """
+        computes the local index of a domain-point within the initial triangulation
+        """
+#        print self.ancestors
+#        print self.triang_ref.triangles
+        d = self.degree
+        triangle_ref = self.triang_ref.triangles[T_ref_id]
+        ancestor     = self.ancestors[T_ref_id]
+        triangle     = self.triang.triangles[ancestor]
+
+        x     = self.triang.x[triangle]         ; y     = self.triang.y[triangle]
+        x_ref = self.triang_ref.x[triangle_ref] ; y_ref = self.triang_ref.y[triangle_ref]
+        a11 = x[0] - x[2]
+        a21 = x[1] - x[2]
+        a12 = y[0] - y[2]
+        a22 = y[1] - y[2]
+        delta = a11*a22-a12*a21
+#        print "-----------"
+#        print T_ref_id
+#        print triangle_ref
+#        print triangle
+#        print "x", x
+#        print "y", y
+#        print "x_ref", x_ref
+#        print "y_ref", y_ref
+        X = x_ref - x[2]  ; Y = y_ref - y[2]
+        i = - X*a22 + Y*a12 ; j = - X*a21 + Y*a11
+        i /= delta        ; j /= delta
+        i *= d            ; j *= d
+        i = iround(i)     ; j = iround(j)
+        print i,j
+        plt.plot(x,y,"oy")
+        plt.plot(x_ref,y_ref,"xr")
+        return i,j
+#        print "-----------"
+
+
+#+    def __call__(self, xy):
+#+        """
+#+        evaluates the surface using bernstein polynomial
+#+        """
+#+        A = np.array(xy)
+#+        T_id = self.find_simplex(A)
+#+        vertices = self.vertices[T_id,...]
+#+        coeffs = self.control[T_id,...]
+#+        c = barycentric_coords(vertices, A)
+#+
+#+        value = 0.
+#+        i_pos = 0
+#+        for i in range(0, self.degree+1):
+#+            for j in range(0, self.degree+1-i):
+#+                k = self.degree - i - j
+#+                bern = self._bernstein([i,j,k], c)
+#+                value += bern * coeffs[i_pos]
+#+                i_pos += 1
+#+        return value
+
+#    def evaluate_on_triangle(self, x_bary, T_id):
+#        """
+#        evaluates the Bezier surface on the triangle T_id at the point x_bary
+#        """
+#        triangle = self.triang.triangles[T_id]
+#        mask_ref = np.where(self.triang_ref.triangles_ancestors == T_id)
+#        triangles_ref = self.triang_ref.triangles[mask_ref]
+#        value = 0.
+#        i_pos = 0
+#        for T_ref_id in range(0, triangles_ref.shape[0]):
+#            i,j = self.get_refined_ij(T_ref_id)
+#            k = self.degree - i - j
+#            bern = self._bernstein([i,j,k], x_bary)
+#            value += bern * coeffs[i_pos]
+#            i_pos += 1
+#        return value
 
     @property
     def triang(self):
