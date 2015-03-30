@@ -25,8 +25,7 @@ class Bezier(object):
 
         self._b_coeff = np.zeros_like(self.triang_ref.x)
 
-        for i in range(0, 5):
-            self._compute_ij(i)
+        self._bernstein = bernstein(self.degree)
 
     @property
     def b_coeff(self):
@@ -78,86 +77,109 @@ class Bezier(object):
             vertices[:,0] = self.triang.x[self.triang.triangles[i]]
             vertices[:,1] = self.triang.y[self.triang.triangles[i]]
             c = barycentric_coords(vertices, P)
-#            k = np.where(c>=0)
-#            i = k[0].min()
             if (c[0]+tol >= 0.) and (c[1]+tol >= 0.) and (c[0]+c[1] <= 1.+tol):
                 return i
         return None
 
-    def _compute_ij(self, T_ref_id):
+#    def _compute_ij_ref(self, T_ref_id):
+#        """
+#        computes the local index of a domain-point within the initial triangulation
+#        """
+#        d = self.degree
+#
+#        triangle_ref = self.triang_ref.triangles[T_ref_id]
+#        ancestor     = self.ancestors[T_ref_id]
+#        triangle     = self.triang.triangles[ancestor]
+#
+#        x     = self.triang.x[triangle]         ; y     = self.triang.y[triangle]
+#        x_ref = self.triang_ref.x[triangle_ref] ; y_ref = self.triang_ref.y[triangle_ref]
+#        a11 = x[0] - x[2]
+#        a21 = x[1] - x[2]
+#        a12 = y[0] - y[2]
+#        a22 = y[1] - y[2]
+#        delta = a11*a22-a12*a21
+#        X = x_ref - x[2]  ; Y = y_ref - y[2]
+#        i = - X*a22 + Y*a12 ; j = - X*a21 + Y*a11
+#        i /= delta        ; j /= delta
+#        i *= d            ; j *= d
+#        i = iround(i)     ; j = iround(j)
+#
+#        return np.array(i),np.array(j)
+
+    def _compute_ij(self, T_id):
         """
         computes the local index of a domain-point within the initial triangulation
         """
-#        print self.ancestors
-#        print self.triang_ref.triangles
         d = self.degree
-        triangle_ref = self.triang_ref.triangles[T_ref_id]
-        ancestor     = self.ancestors[T_ref_id]
-        triangle     = self.triang.triangles[ancestor]
 
-        x     = self.triang.x[triangle]         ; y     = self.triang.y[triangle]
-        x_ref = self.triang_ref.x[triangle_ref] ; y_ref = self.triang_ref.y[triangle_ref]
-        a11 = x[0] - x[2]
-        a21 = x[1] - x[2]
-        a12 = y[0] - y[2]
-        a22 = y[1] - y[2]
-        delta = a11*a22-a12*a21
-#        print "-----------"
-#        print T_ref_id
-#        print triangle_ref
-#        print triangle
-#        print "x", x
-#        print "y", y
-#        print "x_ref", x_ref
-#        print "y_ref", y_ref
-        X = x_ref - x[2]  ; Y = y_ref - y[2]
-        i = - X*a22 + Y*a12 ; j = - X*a21 + Y*a11
-        i /= delta        ; j /= delta
-        i *= d            ; j *= d
-        i = iround(i)     ; j = iround(j)
-        print i,j
-        plt.plot(x,y,"oy")
-        plt.plot(x_ref,y_ref,"xr")
-        return i,j
-#        print "-----------"
+        mask_ref = np.where(self.ancestors == T_id)
+        triangles_ref = self.triang_ref.triangles[mask_ref]
 
+        list_i = [] ; list_j = []
+        for T_ref_id in range(0, len(triangles_ref)):
+            x     = self.triang.x[self.triang.triangles[T_id]]
+            y     = self.triang.y[self.triang.triangles[T_id]]
+            x_ref = self.triang_ref.x[self.triang_ref.triangles[T_ref_id]]
+            y_ref = self.triang_ref.y[self.triang_ref.triangles[T_ref_id]]
+            a11 = x[0] - x[2]
+            a21 = x[1] - x[2]
+            a12 = y[0] - y[2]
+            a22 = y[1] - y[2]
+            delta = a11*a22-a12*a21
+            X = x_ref - x[2]  ; Y = y_ref - y[2]
+            i = - X*a21 + Y*a11 ; j = - X*a22 + Y*a12
+            i /= delta        ; j /= delta
+            i *= d            ; j *= d
+            i = iround(i)     ; j = iround(j)
 
-#+    def __call__(self, xy):
-#+        """
-#+        evaluates the surface using bernstein polynomial
-#+        """
-#+        A = np.array(xy)
-#+        T_id = self.find_simplex(A)
-#+        vertices = self.vertices[T_id,...]
-#+        coeffs = self.control[T_id,...]
-#+        c = barycentric_coords(vertices, A)
-#+
-#+        value = 0.
-#+        i_pos = 0
-#+        for i in range(0, self.degree+1):
-#+            for j in range(0, self.degree+1-i):
-#+                k = self.degree - i - j
-#+                bern = self._bernstein([i,j,k], c)
-#+                value += bern * coeffs[i_pos]
-#+                i_pos += 1
-#+        return value
+            list_i.append(i) ; list_j.append(j)
 
-#    def evaluate_on_triangle(self, x_bary, T_id):
-#        """
-#        evaluates the Bezier surface on the triangle T_id at the point x_bary
-#        """
-#        triangle = self.triang.triangles[T_id]
-#        mask_ref = np.where(self.triang_ref.triangles_ancestors == T_id)
-#        triangles_ref = self.triang_ref.triangles[mask_ref]
-#        value = 0.
-#        i_pos = 0
-#        for T_ref_id in range(0, triangles_ref.shape[0]):
-#            i,j = self.get_refined_ij(T_ref_id)
-#            k = self.degree - i - j
-#            bern = self._bernstein([i,j,k], x_bary)
-#            value += bern * coeffs[i_pos]
-#            i_pos += 1
-#        return value
+        return np.array(list_i), np.array(list_j)
+
+    def evaluate_on_triangle(self, x_bary, T_id):
+        """
+        evaluates the Bezier surface on the triangle T_id at the point x_bary
+        """
+        triangle = self.triang.triangles[T_id]
+        mask_ref = np.where(self.ancestors == T_id)
+#        print mask_ref
+        triangles_ref = self.triang_ref.triangles[mask_ref]
+
+        list_x_ref = self.triang_ref.x[triangles_ref]
+        list_y_ref = self.triang_ref.y[triangles_ref]
+        list_coeff = self.b_coeff[triangles_ref]
+
+        list_i, list_j = self._compute_ij(T_id)
+
+        x_size = 3*len(list_x_ref)
+        A = np.zeros((x_size,2))
+        A[:,0] = np.array(list_x_ref.reshape(x_size))
+        A[:,1] = np.array(list_y_ref.reshape(x_size))
+        a = np.ascontiguousarray(A)
+        unique_a, idx = np.unique(a.view([('', a.dtype)]*a.shape[1]), return_index=True)
+
+        IJ = np.zeros((x_size,2), dtype=np.int32)
+        IJ[:,0] = np.array(list_i.reshape(x_size))
+        IJ[:,1] = np.array(list_j.reshape(x_size))
+
+        coeffs = np.array(list_coeff.reshape(x_size))
+
+        IJ = IJ[idx,:]
+        coeffs = coeffs[idx]
+
+#        print IJ[:,0]
+#        print IJ[:,1]
+#
+#        for x_ref,y_ref in zip(list_x_ref, list_y_ref):
+#            plt.plot(x_ref,y_ref,"xr")
+
+        value = 0.
+        for ij in range(0, IJ.shape[0]):
+            i = IJ[ij,0] ; j = IJ[ij,1]
+#            print ">W> ", i,j
+            bern = self._bernstein([i,j], x_bary)
+            value += bern * coeffs[ij]
+        return value
 
     @property
     def triang(self):
