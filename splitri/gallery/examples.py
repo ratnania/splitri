@@ -14,8 +14,7 @@ def two_triangles():
 
     return tri.Triangulation(points[:,0], points[:,1])
 
-def hexa_meshes(radius=1., center=None):
-    n_angles = 6
+def hexa_meshes(radius=1., center=None, n_angles = 6):
     if center is None:
         center = np.array([0.,0.])
     angles = np.linspace(0.,2*np.pi,n_angles+1)
@@ -37,9 +36,9 @@ def hexa_meshes(radius=1., center=None):
             I2 = 1
         triangles.append([I0,I1,I2])
 
-    print points[:,0]
-    print points[:,1]
-    print triangles
+#    print points[:,0]
+#    print points[:,1]
+#    print triangles
 
     return tri.Triangulation(points[:,0], points[:,1], triangles)
 
