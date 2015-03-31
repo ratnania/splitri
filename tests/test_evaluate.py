@@ -6,7 +6,7 @@ import matplotlib.tri as tri
 import matplotlib.pyplot as plt
 from splitri.gallery.examples import square,collela \
         , domain_1, domain_2,annulus, two_triangles \
-        , hexa_meshes
+        , hexa_meshes, hexa_meshes_annulus
 from splitri.bezier import Bezier
 from splitri.utils.triangle import barycentric_coords
 from matplotlib.tri import Triangulation, UniformTriRefiner
@@ -147,7 +147,8 @@ def test_3():
     center = np.array([0.,0.])
     angle = 2*pi/n_angles
 
-    triang = hexa_meshes(radius=radius, center=center, n_angles=n_angles)
+#    triang = hexa_meshes(radius=radius, center=center, n_angles=n_angles)
+    triang = hexa_meshes_annulus(min_radius=1., max_radius=2., center=center, n_angles=n_angles)
 
     Bzr = Bezier(degree, triang.x, triang.y, triang.triangles)
 
@@ -197,9 +198,6 @@ def test_3():
             Bzr.triang_ref.y[i_vertex] = nrb.points[j,1]
 
 
-
-
-
     x = Bzr.triang_ref.x
     y = Bzr.triang_ref.y
 
@@ -244,8 +242,26 @@ def test_3():
     plt.show()
 
 
+def test_4():
+    degree = 3
+    min_radius = 1.
+    max_radius = 2.
+    center = np.array([0.,0.])
+
+    triang = hexa_meshes_annulus(min_radius=min_radius, max_radius=max_radius, center=center)
+    Bzr = Bezier(degree, triang.x, triang.y, triang.triangles)
+
+    plt.triplot(Bzr.triang, '-', lw=0.75, color="red")
+    plt.triplot(Bzr.triang_ref, lw=0.5, color="blue")
+
+#    xlim = [-1.2,1.2] ; ylim = [-1.2,1.2]
+#    plt.xlim(*xlim)  ; plt.ylim(*ylim)
+    plt.show()
+
+
 #######################################################
 if __name__ == "__main__":
 #    test_1()
 #    test_2()
-    test_3()
+#    test_3()
+    test_4()

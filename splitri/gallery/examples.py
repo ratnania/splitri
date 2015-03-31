@@ -4,6 +4,8 @@ from numpy import cos, sin, pi
 from scipy.spatial import Delaunay
 import matplotlib.tri as tri
 import math
+from splitri.bezier import Bezier
+import matplotlib.pyplot as plt
 
 def two_triangles():
     points = np.zeros((4,2))
@@ -39,6 +41,89 @@ def hexa_meshes(radius=1., center=None, n_angles = 6):
 #    print points[:,0]
 #    print points[:,1]
 #    print triangles
+
+    return tri.Triangulation(points[:,0], points[:,1], triangles)
+
+#def hexa_meshes_annulus(min_radius=1., max_radius=2., center=None, n_angles = 6):
+#    if center is None:
+#        center = np.array([0.,0.])
+#    angles = np.linspace(0.,2*np.pi,n_angles+1)
+#    # construct points
+#    x = max_radius * cos(angles)
+#    y = max_radius * sin(angles)
+#
+#    points = np.ones((n_angles+1,2))
+#    points *= center
+#    points[1:,0] += x[:-1]
+#    points[1:,1] += y[:-1]
+#    # construct triangles
+#    I0 = 0 # center
+#    triangles = []
+#    for i in range(0, n_angles):
+#        I1 = i+1
+#        I2 = I1+1
+#        if I2==n_angles+1:
+#            I2 = 1
+#        triangles.append([I0,I1,I2])
+#
+#    degree = 2
+#    Bzr = Bezier(degree, points[:,0], points[:,1], triangles)
+#    triang = Bzr.triang_ref
+##    plt.triplot(triang, '-', lw=0.75, color="red")
+##    print points[:,0]
+##    print points[:,1]
+##    print triangles
+#
+#    return tri.Triangulation(triang.x, triang.y, triang.triangles)
+
+def hexa_meshes_annulus(min_radius=1., max_radius=2., center=None):
+    n_angles = 6
+    if center is None:
+        center = np.array([0.,0.])
+    angles = np.linspace(0.,2*np.pi,n_angles+1)
+    # construct points
+
+    npts = (n_angles+1) + (2*n_angles+1)
+    points = np.ones((npts,2))
+    points *= center
+
+    x = min_radius * cos(angles)
+    y = min_radius * sin(angles)
+    points[1:n_angles+1,0] += x[:-1]
+    points[1:n_angles+1,1] += y[:-1]
+
+    x = max_radius * cos(angles)
+    y = max_radius * sin(angles)
+    i_pos = n_angles+1
+    for i in range(0,n_angles):
+        points[i_pos,0] += x[i]
+        points[i_pos,1] += y[i]
+        i_pos +=1
+
+        points[i_pos,0] += .5 * ( x[i] + x[i+1] )
+        points[i_pos,1] += .5 * ( y[i] + y[i+1] )
+        i_pos +=1
+
+    triangles =[]
+    triangles.append([1, 8,2])
+    triangles.append([2,10,3])
+    triangles.append([3,12,4])
+    triangles.append([4,14,5])
+    triangles.append([5,16,6])
+    triangles.append([6,18,1])
+
+    triangles.append([1,18,7])
+    triangles.append([1,7,8])
+    triangles.append([2,8,9])
+    triangles.append([2,9,10])
+    triangles.append([3,10,11])
+    triangles.append([3,11,12])
+    triangles.append([4,12,13])
+    triangles.append([4,13,14])
+    triangles.append([5,14,15])
+    triangles.append([5,15,16])
+    triangles.append([6,16,17])
+    triangles.append([6,17,18])
 
     return tri.Triangulation(points[:,0], points[:,1], triangles)
 
