@@ -133,7 +133,17 @@ class Bezier(object):
             i = X*a22 - Y*a12 ; j = -( X*a21 - Y*a11)
             i /= delta        ; j /= delta
             i *= d            ; j *= d
+            ii = i            ; jj = j
             i = iround(i)     ; j = iround(j)
+
+            ll_condition = np.all(i+j<=self.degree)
+            if not ll_condition:
+                print self.degree
+                print ii,jj, i, j, i+j
+                print "x_ref, y_ref ", x_ref, y_ref
+                print "x,y ", x, y
+
+#            assert(ll_condition)
 
             list_i.append(i) ; list_j.append(j)
 
@@ -180,8 +190,12 @@ class Bezier(object):
         vertices[:,0] = x_ref
         vertices[:,1] = y_ref
 
+#        sum_IJ = IJ[:,0] + IJ[:,1]
+#        print "============"
 #        print IJ[:,0]
 #        print IJ[:,1]
+#        print sum_IJ[:]
+#        assert np.all(sum_IJ >= 0)
 
         value    = 0.
         position = np.zeros(2)
@@ -194,9 +208,9 @@ class Bezier(object):
             position += bern * vertices[ij]
 
         # test if the position is the current triangle
-        if (self.find_simplex(position) == T_id):
-            print ">>> warning: coordinates ", x_bary, " out of triangle ", T_id
-            print "<<< computed position is ", position
+#        if (self.find_simplex(position) == T_id):
+#            print ">>> warning: coordinates ", x_bary, " out of triangle ", T_id
+#            print "<<< computed position is ", position
 
         return value, position
 

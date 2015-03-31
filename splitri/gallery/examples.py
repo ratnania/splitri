@@ -5,6 +5,33 @@ from scipy.spatial import Delaunay
 import matplotlib.tri as tri
 import math
 
+def square(n, delaunay=False):
+    # ...
+    u = np.linspace(-1.,1.,n)
+    v = np.linspace(-1.,1.,n)
+
+    U,V = np.meshgrid(u,v)
+
+    x = U.reshape(U.size)
+    y = V.reshape(V.size)
+    # ...
+
+    if delaunay:
+        return tri.Triangulation(x, y)
+    else:
+        triangles = []
+        for j in range(0,n-1):
+            for i in range(0,n-1):
+                I1 = i+j*n ; I2 = i+1+j*n ; I3 = i+1+(j+1)*n
+                T = [I1,I2,I3]
+                triangles.append(T)
+
+                I1 = i+j*n ; I2 = i+(j+1)*n ; I3 = i+1+(j+1)*n
+                T = [I1,I2,I3]
+                triangles.append(T)
+
+        return tri.Triangulation(x, y, triangles)
+
 def collela(n, delaunay=False):
     # ...
     u = np.linspace(0.,1.,n)

@@ -13,22 +13,34 @@ class bernstein(object):
     def degree(self):
         return self._degree
 
-    def __call__(self, ij, x_barycentric):
+    def __call__(self, ij, x_barycentric, debug=False):
         """
         evaluates the ijk bernstein polynomial at the point x
         given by its barycentric coordinates
         """
         x_barycentric = np.array(x_barycentric)
-        k = self.degree - ij[0] - ij[1]
+        i = ij[0]
+        j = ij[1]
+#        if i==self.degree:
+#            j = 0
+        k = self.degree - i - j
+        assert(k>=0)
+
         w = 1. - x_barycentric.sum()
 
-        B = x_barycentric[0]**ij[0] \
-          * x_barycentric[1]**ij[1] \
+#        print x_barycentric,w,ij,k
+
+        B = x_barycentric[0]**i \
+          * x_barycentric[1]**j \
           * w**k
 
         B *= self._factorial[self.degree]
-        B /= self._factorial[ij[0]]
-        B /= self._factorial[ij[1]]
+        B /= self._factorial[i]
+        B /= self._factorial[j]
         B /= self._factorial[k]
+
+        if debug:
+            if not np.isfinite(B):
+                print "Problem occurs with ",  x_barycentric,w,i,j,k, B
 
         return B
