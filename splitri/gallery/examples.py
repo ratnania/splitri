@@ -5,6 +5,15 @@ from scipy.spatial import Delaunay
 import matplotlib.tri as tri
 import math
 
+def two_triangles():
+    points = np.zeros((4,2))
+    points[0,:] = [0.0, 1.0] # A
+    points[1,:] = [-1., 0.0] # B
+    points[2,:] = [1.0, 0.0] # C
+    points[3,:] = [0.0, -1.] # D
+
+    return tri.Triangulation(points[:,0], points[:,1])
+
 def square(n, delaunay=False):
     # ...
     u = np.linspace(-1.,1.,n)
