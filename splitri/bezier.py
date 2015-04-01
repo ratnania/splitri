@@ -13,8 +13,37 @@ from .utils.utils import iround
 
 
 class Bezier(object):
-    def __init__(self, degree, x, y, triangles=None):
+    """
+    An abstract Bezier object class.
 
+    This Bezier class allows for the definition of Bezier surfaces or NURBS
+    on triangles. First, the logical (B-net) is constructed. Then, the user can
+    specify the control points and associated values for the Bernstein
+    representation. If triangles are not specified, a Delaunay triangulation is
+    constructed.
+
+    Args:
+        degree (int): degree of the Bernstein representation
+
+        x (array_like):  x coordinates for vertices
+
+        y (array_like):  y coordinates for vertices
+
+        triangles (array_like, optional): list of 3-tuples defining the vertices indices
+
+
+    Create a quarter circle NURBS curve with 2D control points and
+    rational weigths and check error:
+
+    >>> C = [[0, 1], [1, 1], [1, 0]] # 3x2 grid of 2D control points
+    >>> w = [1, np.sqrt(2)/2, 1]     # rational weigths
+    >>> U = [0,0,0, 1,1,1]           # knot vector
+
+    """
+    def __init__(self, degree, x, y, triangles=None):
+        """
+        Create a Bezier object.
+        """
         self._x         = x
         self._y         = y
         self._triangles = triangles
@@ -34,12 +63,21 @@ class Bezier(object):
 
     @property
     def b_coeff(self):
+        """
+        return the Bernstein coefficients for points domain
+        """
         return self._b_coeff
 
     def control(self, i_vertex):
-        return self._control_x[i_vertex], self._control_y[i_vertex]
+        """
+        return the control point as a numpy array, for a given domain point
+        """
+        return np.array([self._control_x[i_vertex], self._control_y[i_vertex]])
 
     def set_control(self, i_vertex, x, y):
+        """
+        Set the control point by giving its coordinates x,y for a given domain point
+        """
         self._control_x[i_vertex] = x
         self._control_y[i_vertex] = y
 
@@ -56,9 +94,8 @@ class Bezier(object):
 
     def find_vertex_domain(self, P):
         """
-        returns the vertex id
-        research is performed on the refined
-        triangulations with the domain points
+        returns the vertex id of a given domain point.
+        research is performed on the B-net (refined triangulations)
         """
         x_ref = self.triang_ref.x
         y_ref = self.triang_ref.y
@@ -69,7 +106,7 @@ class Bezier(object):
 
     def find_vertex(self, P):
         """
-        returns the vertex id
+        returns the vertex id of a vertex.
         research is performed on the initial triangulation
         """
         x_ref = self.triang.x
@@ -81,7 +118,8 @@ class Bezier(object):
 
     def find_simplex(self, P, tol=1.e-7):
         """
-        returns the id of the triangle that contains the point xyz
+        returns the id of the triangle that contains the point P.
+        If not found, returns None
         """
         ntri = self.triang.triangles.shape[0]
         vertices = np.zeros((3,2))
@@ -169,6 +207,7 @@ class Bezier(object):
     def evaluate_on_triangle(self, x_bary, T_id):
         """
         evaluates the Bezier surface on the triangle T_id at the point x_bary
+        given by its barycentric coordinates with respect to triangle T_id
         """
         triangle = self.triang.triangles[T_id]
         mask_ref = np.where(self.ancestors == T_id)
@@ -243,38 +282,57 @@ class Bezier(object):
 
     @property
     def triang(self):
+        """
+        returns the initial triangulation
+        """
         return self._triang
 
     @property
     def refiner(self):
+        """
+        returns the triangulation refiner object
+        """
         return self._refiner
 
     @property
     def triang_ref(self):
+        """
+        returns the refined triangulation (B-net)
+        """
         return self._triang_ref
 
     @property
     def ancestors(self):
+        """
+        returns ancestor for each small triangle of the B-net within the initial
+        triangulation
+        """
         return self._ancestors
 
     @property
     def triangles(self):
+        """
+        returns initial triangles if given
+        """
         return self._triangles
 
     @property
     def degree(self):
+        """
+        returns the total polynomial degree
+        """
         return self._degree
 
     @property
     def x(self):
+        """
+        returns the x coordinates of vertices
+        """
         return self._x
 
     @property
     def y(self):
+        """
+        returns the y coordinates of vertices
+        """
         return self._y
-
-    @property
-    def control(self):
-        return self.triang_ref.x, self.triang_ref.y
-
-
