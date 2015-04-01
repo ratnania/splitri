@@ -143,7 +143,7 @@ class Bezier(object):
                 print "x_ref, y_ref ", x_ref, y_ref
                 print "x,y ", x, y
 
-#            assert(ll_condition)
+            assert(ll_condition)
 
             list_i.append(i) ; list_j.append(j)
 

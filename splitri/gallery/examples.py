@@ -44,37 +44,35 @@ def hexa_meshes(radius=1., center=None, n_angles = 6):
 
     return tri.Triangulation(points[:,0], points[:,1], triangles)
 
-#def hexa_meshes_annulus(min_radius=1., max_radius=2., center=None, n_angles = 6):
-#    if center is None:
-#        center = np.array([0.,0.])
-#    angles = np.linspace(0.,2*np.pi,n_angles+1)
-#    # construct points
-#    x = max_radius * cos(angles)
-#    y = max_radius * sin(angles)
-#
-#    points = np.ones((n_angles+1,2))
-#    points *= center
-#    points[1:,0] += x[:-1]
-#    points[1:,1] += y[:-1]
-#    # construct triangles
-#    I0 = 0 # center
-#    triangles = []
-#    for i in range(0, n_angles):
-#        I1 = i+1
-#        I2 = I1+1
-#        if I2==n_angles+1:
-#            I2 = 1
-#        triangles.append([I0,I1,I2])
-#
-#    degree = 2
-#    Bzr = Bezier(degree, points[:,0], points[:,1], triangles)
-#    triang = Bzr.triang_ref
-##    plt.triplot(triang, '-', lw=0.75, color="red")
-##    print points[:,0]
-##    print points[:,1]
-##    print triangles
-#
-#    return tri.Triangulation(triang.x, triang.y, triang.triangles)
+def hexa_meshes_2(radius=2., center=None, n_levels=2):
+    n_angles = 6
+    if center is None:
+        center = np.array([0.,0.])
+    angles = np.linspace(0.,2*np.pi,n_angles+1)
+    # construct points
+    x = radius * cos(angles)
+    y = radius * sin(angles)
+
+    points = np.ones((n_angles+1,2))
+    points *= center
+    points[1:,0] += x[:-1]
+    points[1:,1] += y[:-1]
+    # construct triangles
+    I0 = 0 # center
+    triangles = []
+    for i in range(0, n_angles):
+        I1 = i+1
+        I2 = I1+1
+        if I2==n_angles+1:
+            I2 = 1
+        triangles.append([I0,I1,I2])
+
+    degree = n_levels + 1
+    Bzr = Bezier(degree, points[:,0], points[:,1], triangles)
+    triang = Bzr.triang_ref
+#    plt.triplot(triang, '-', lw=0.75, color="red")
+
+    return tri.Triangulation(triang.x, triang.y, triang.triangles)
 
 def hexa_meshes_annulus(min_radius=1., max_radius=2., center=None):
     n_angles = 6
