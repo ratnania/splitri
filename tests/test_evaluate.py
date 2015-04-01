@@ -267,8 +267,9 @@ def test_5():
     center = np.array([0.,0.])
     n_angles = 6
     angle = 2*pi/n_angles
+    n_levels = 5
 
-    triang = hexa_meshes_2(radius=max_radius, center=center, n_levels=1)
+    triang = hexa_meshes_2(radius=max_radius, center=center, n_levels=n_levels)
     Bzr = Bezier(degree, triang.x, triang.y, triang.triangles)
 
     plt.triplot(Bzr.triang, '-', lw=0.75, color="red")
@@ -278,22 +279,29 @@ def test_5():
     plt.xlim(*xlim)  ; plt.ylim(*ylim)
 #    plt.show()
 
-    def create_boundary(i):
-        t = 0.5
+    def create_boundary(i, n_levels):
         nrb = circle(radius=max_radius, center=center, angle=angle)
-        times = nrb.degree[0]
-        for _ in range(0, times):
-            nrb.insert(0,t)
-        nrb = nrb.clone().elevate(0, times=degree-2)
+        axis = 0
+        times = nrb.degree[axis]
+        list_t = np.linspace(0.,1.,n_levels+2)[1:-1]
+        for t in list_t:
+            for _ in range(0, times):
+                nrb.insert(axis,t)
+        nrb = nrb.clone().elevate(axis, times=degree-2)
         if i > 0:
             nrb.rotate(i*angle)
         # split the curve into a list of bezier curves
         geo = cad_geometry()
         cad_nrb = cad_nurbs(nrb.knots, nrb.points, weights=nrb.weights)
         geo.append(cad_nrb)
-        geo.split(0,t,0)
-#        plt.plot(geo[0].points[:,0],geo[0].points[:,1],"-ob")
+        for enum,t in enumerate(list_t[:-1]):
+            geo.split(enum,t,axis)
+        geo.split(-1,list_t[-1],axis, normalize=[True,True])
+
+#        for nrb in geo:
+#            plt.plot(nrb.points[:,0],nrb.points[:,1],"-ob")
 #        plt.plot(geo[1].points[:,0],geo[1].points[:,1],"-or")
+#        plt.show()
         return geo
 
     def nearest_boundary(xmid, ymid):
@@ -307,7 +315,7 @@ def test_5():
 
     list_crv = []
     for i in range(0,n_angles):
-        geo = create_boundary(i)
+        geo = create_boundary(i, n_levels)
         for nrb in geo:
             list_crv.append(nrb)
 
@@ -363,13 +371,9 @@ def test_5():
 #            print i_vertex
             if len(i_vertex) >0:
                 i_vertex = i_vertex[0]
-                Bzr.triang_ref.x[i_vertex] = nrb.points[i,0]
-                Bzr.triang_ref.y[i_vertex] = nrb.points[i,1]
+                Bzr.set_control(i_vertex, nrb.points[i,0], nrb.points[i,1])
 
-    plt.plot(Bzr.triang_ref.x, Bzr.triang_ref.y,"xr")
-
-#    plt.show()
-#    import sys; sys.exit(0)
+#    plt.plot(Bzr.triang_ref.x, Bzr.triang_ref.y,"xr")
 
     x = Bzr.triang_ref.x
     y = Bzr.triang_ref.y
@@ -398,8 +402,8 @@ def test_5():
 
             C = barycentric_coords(vertices, P)
 #            print "bary coord ", C
-#            plt.plot(vertices[:,0],vertices[:,1],"ob")
-#            plt.plot(P[0],P[1],"xr")
+#            plt.plot(vertices[:,0],vertices[:,1],"dy")
+#            plt.plot(P[0],P[1],"dg")
 #            plt.show()
 
             # evaluate the bezier surface on the point C within the triangle T

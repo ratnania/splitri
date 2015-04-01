@@ -24,6 +24,8 @@ class bernstein(object):
 #        if i==self.degree:
 #            j = 0
         k = self.degree - i - j
+        assert(i>=0)
+        assert(j>=0)
         assert(k>=0)
 
         w = 1. - x_barycentric.sum()

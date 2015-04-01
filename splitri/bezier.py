@@ -19,9 +19,14 @@ class Bezier(object):
         self._y         = y
         self._triangles = triangles
         self._degree    = degree
-        self._control   = None
+        self._control_x = None
+        self._control_y = None
 
         self._create_bezier_patch()
+
+        # initialize control points to domain points
+        self._control_x   = self.triang_ref.x.copy()
+        self._control_y   = self.triang_ref.y.copy()
 
         self._b_coeff = np.zeros_like(self.triang_ref.x)
 
@@ -30,6 +35,13 @@ class Bezier(object):
     @property
     def b_coeff(self):
         return self._b_coeff
+
+    def control(self, i_vertex):
+        return self._control_x[i_vertex], self._control_y[i_vertex]
+
+    def set_control(self, i_vertex, x, y):
+        self._control_x[i_vertex] = x
+        self._control_y[i_vertex] = y
 
     def _create_bezier_patch(self):
         triang = tri.Triangulation(self.x, self.y, self.triangles)
@@ -137,11 +149,16 @@ class Bezier(object):
             i = iround(i)     ; j = iround(j)
 
             ll_condition = np.all(i+j<=self.degree)
-            if not ll_condition:
-                print self.degree
-                print ii,jj, i, j, i+j
-                print "x_ref, y_ref ", x_ref, y_ref
-                print "x,y ", x, y
+            ll_condition = ll_condition and np.all(i>=0)
+            ll_condition = ll_condition and np.all(j>=0)
+#            if not ll_condition:
+#                print self.degree
+#                print ii,jj, i, j, i+j
+#                print "x_ref, y_ref ", x_ref, y_ref
+#                print "x,y ", x, y
+#                plt.plot(x,y,"ob")
+#                plt.plot(x_ref,y_ref,"or")
+#                plt.show()
 
             assert(ll_condition)
 
@@ -160,6 +177,10 @@ class Bezier(object):
 
         list_x_ref = self.triang_ref.x[triangles_ref]
         list_y_ref = self.triang_ref.y[triangles_ref]
+
+        list_cx_ref = self._control_x[triangles_ref]
+        list_cy_ref = self._control_y[triangles_ref]
+
         list_coeff = self.b_coeff[triangles_ref]
 
         list_i, list_j = self._compute_ij(T_id)
@@ -172,6 +193,10 @@ class Bezier(object):
         a = np.ascontiguousarray(A)
         unique_a, idx = np.unique(a.view([('', a.dtype)]*a.shape[1]), return_index=True)
 
+        control = np.zeros((x_size,2))
+        control[:,0] = np.array(list_cx_ref.reshape(x_size))
+        control[:,1] = np.array(list_cy_ref.reshape(x_size))
+
         IJ = np.zeros((x_size,2), dtype=np.int32)
         IJ[:,0] = np.array(list_i.reshape(x_size))
         IJ[:,1] = np.array(list_j.reshape(x_size))
@@ -182,6 +207,8 @@ class Bezier(object):
 
         IJ = IJ[idx,:]
         coeffs = coeffs[idx]
+        control = control[idx]
+
         x_ref  = x_ref[idx]
         y_ref  = y_ref[idx]
         vertices = np.zeros((x_ref.shape[0],2))
@@ -205,7 +232,7 @@ class Bezier(object):
             bern = self._bernstein([i,j], x_bary)
 
             value    += bern * coeffs[ij]
-            position += bern * vertices[ij]
+            position += bern * control[ij,:]
 
         # test if the position is the current triangle
 #        if (self.find_simplex(position) == T_id):
