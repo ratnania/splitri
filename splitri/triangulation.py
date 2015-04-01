@@ -167,9 +167,15 @@ class hexagonal(Bezier):
     create an hexagonal mesh object
     """
     def __init__(self, degree, radius=1., center=None, n_levels=2):
+
         n_angles = 6
         if center is None:
             center = np.array([0.,0.])
+
+        self._radius = radius
+        self._center = center
+        self._n_levels = n_levels
+
         angles = np.linspace(0.,2*np.pi,n_angles+1)
         # construct points
         x = radius * cos(angles)
@@ -194,3 +200,57 @@ class hexagonal(Bezier):
         triang = Bzr.triang_ref
 
         Bezier.__init__(self, degree, triang.x, triang.y, triang.triangles)
+
+    @property
+    def radius(self):
+        return self._radius
+
+    @property
+    def center(self):
+        return self._center
+
+    @property
+    def n_levels(self):
+        return self._n_levels
+
+    def get_level_vertices(self, level, indices=False):
+        """
+        returns vertices on the level number level.
+        the returned array has a size of
+        6*(level+1)
+        returns indices of these points on the triangulation, if indices is True
+        """
+        assert(level <= self.n_levels)
+
+        radius = (level+1) * self.radius / (self.n_levels+1)
+        n_angles = 6
+        angles = np.linspace(0.,2*np.pi,n_angles+1)
+
+        # construct points
+        x = radius * cos(angles)
+        y = radius * sin(angles)
+
+        x_new = [] ; y_new = []
+        for i in range(0, n_angles):
+            # remove the last point
+            t = np.linspace(0.,1.,level+2)[0:-1]
+
+            x_tmp = (1.-t) * x[i] + t * x[i+1]
+            y_tmp = (1.-t) * y[i] + t * y[i+1]
+
+            x_new += list(x_tmp)
+            y_new += list(y_tmp)
+
+        x = np.array(x_new)
+        y = np.array(y_new)
+
+        if not indices:
+            return x,y
+        else:
+            list_i_vertices = []
+            for i in range(0, x.shape[0]):
+                P = np.array([x[i],y[i]])
+                i_vertex = self.find_vertex(P)
+                list_i_vertices.append(i_vertex)
+            return x,y,list_i_vertices
+

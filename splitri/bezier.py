@@ -11,6 +11,7 @@ from .utils.triangle import barycentric_coords
 from .trirefine import UniformBezierTriRefiner
 from .utils.utils import iround
 
+l2norm = np.linalg.norm
 
 class Bezier(object):
     """
@@ -92,7 +93,7 @@ class Bezier(object):
         self._ancestors = ancestors
         self._refiner = refiner
 
-    def find_vertex_domain(self, P):
+    def find_vertex_domain(self, P, tol=1.e-7):
         """
         returns the vertex id of a given domain point.
         research is performed on the B-net (refined triangulations)
@@ -101,19 +102,19 @@ class Bezier(object):
         y_ref = self.triang_ref.y
 
         list_i = [i for i in range(0, x_ref.shape[0]) \
-                  if x_ref[i]==P[0] and y_ref[i]==P[1]]
+                  if (x_ref[i]-P[0])**2 + (y_ref[i]-P[1])**2 < tol]
         return list_i
 
-    def find_vertex(self, P):
+    def find_vertex(self, P, tol=1.e-7):
         """
         returns the vertex id of a vertex.
         research is performed on the initial triangulation
         """
-        x_ref = self.triang.x
-        y_ref = self.triang.y
+        x = self.triang.x
+        y = self.triang.y
 
-        list_i = [i for i in range(0, x_ref.shape[0]) \
-                  if x_ref[i]==P[0] and y_ref[i]==P[1]]
+        list_i = [i for i in range(0, x.shape[0]) \
+                  if (x[i]-P[0])**2 + (y[i]-P[1])**2 < tol]
         return list_i
 
     def find_simplex(self, P, tol=1.e-7):
