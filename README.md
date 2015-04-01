@@ -35,6 +35,11 @@ You can install both **numpy** and **scipy** using
 
     sudo apt-get install python-numpy python-scipy python-matplotlib ipython ipython-notebook python-pandas python-sympy python-nose
 
+**matplotlib**
+--------------
+
+[**matplotlib**](http://www.matplotlib.org/)  is a python 2D plotting library which produces publication quality figures in a variety of hardcopy formats and interactive environments across platforms. matplotlib can be used in python scripts, the python and ipython shell
+
 **igakit**
 ----------
 
