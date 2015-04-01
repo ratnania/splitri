@@ -5,6 +5,9 @@ from scipy.spatial import Delaunay
 import matplotlib.tri as tri
 import matplotlib.pyplot as plt
 from splitri.boxsplines import *
+from splitri.triangulation import triangulation_square_I, triangulation_square_II
+from splitri.trirefine import UniformBezierTriRefiner
+from matplotlib.tri import TriRefiner, UniformTriRefiner
 
 def test_211():
     L = 2.
@@ -14,7 +17,7 @@ def test_211():
 
     plot_field = True
 
-    tri_box = triangulation_I(n, degree)
+    tri_box = triangulation_square_I(n, degree)
     Box     = BoxSpline_211(tri_box)
 
     if plot_field:
@@ -47,7 +50,7 @@ def test_221():
 
     plot_field = True
 
-    tri_box = triangulation_I(n, degree)
+    tri_box = triangulation_square_I(n, degree)
     Box     = BoxSpline_221(tri_box)
 
     if plot_field:
@@ -79,7 +82,7 @@ def test_222():
 
     plot_field = True
 
-    tri_box = triangulation_I(n, degree)
+    tri_box = triangulation_square_I(n, degree)
     Box     = BoxSpline_222(tri_box)
 
     if plot_field:
@@ -111,7 +114,7 @@ def test_1111():
 
     plot_field = True
 
-    tri_box = triangulation_II(n, degree)
+    tri_box = triangulation_square_II(n, degree)
     Box     = BoxSpline_1111(tri_box)
 
     if plot_field:
