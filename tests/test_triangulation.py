@@ -5,6 +5,7 @@ from scipy.spatial import Delaunay
 import matplotlib.tri as tri
 import matplotlib.pyplot as plt
 from splitri.utils.triangle import barycentric_coords
+from splitri.utils.utils import construct_curve_from_points
 from splitri.triangulation import triangulation_square_I, triangulation_square_II
 import splitri.triangulation as stri
 from splitri.triangulation import hexagonal
@@ -73,6 +74,85 @@ def test_4():
     plt.show()
 
 def test_5():
+
+    radius=1.
+    center=None
+    n_levels=7
+    degree = 3
+
+    Bzr =  hexagonal(degree, radius=radius, center=center, n_levels=n_levels)
+
+#    for level,col in zip(range(0,n_levels+1), ["r","b", "g", "y","m","k"]):
+#        for label in range(0, degree+1):
+#            x,y, list_i_vertices = Bzr.get_label_domain_points(level, label, indices=True)
+#            print "level ",level," vertices found ", list_i_vertices
+#            plt.plot(x,y,'o'+col)
+#
+#    plt.triplot(Bzr.triang, '-', lw=0.75, color="red")
+#    plt.triplot(Bzr.triang_ref, lw=0.5, color="blue")
+#    plt.show()
+
+    def cloud_data(n_levels):
+        """
+        generates a list of list of points, each array describes 1/6 of a flux
+        surface
+        """
+        center = np.array([2.,0.])
+
+        n_angles = 6
+        angles = np.linspace(0.,2*np.pi,n_angles+1)
+        radius = 1.
+
+        list_pts = []
+        for level in range(1, n_levels+1):
+            _radius = level * radius / (n_levels+1)
+            sl = []
+            for angle_b,angle_e in zip(angles[0:-1],angles[1:]):
+                _angles = np.linspace(angle_b,angle_e,50)
+                x = center[0] + _radius * np.cos(_angles)
+                y = center[1] + _radius * np.sin(_angles)
+                sl.append([x,y])
+            list_pts.append(sl)
+        return list_pts
+
+    list_pts = cloud_data(n_levels*degree)
+    pts_level = list_pts[0]
+    pts_section = pts_level[0]
+    pts = pts_section[0]
+    print len(list_pts),len(pts_level), len(pts_section), len(pts)
+
+#    for i in range(0,len(list_pts)):
+#        pts_level = list_pts[i]
+#        pts_section = pts_level[0]
+#        pts = pts_section[0]
+#        level = i + 1
+#        for pts_section in pts_level:
+#            plt.plot(pts_section[0], pts_section[1],".")
+#    plt.show()
+
+    i_label_level = 0
+    for level in range(1,n_levels+1):
+        for label in range(0,degree+1):
+#            i_label_level = (level-1) * degree + label
+
+            if i_label_level == n_levels*degree:
+                break
+
+            pts_level = list_pts[i_label_level]
+            for pts_section in pts_level:
+                x = pts_section[0]
+                y = pts_section[1]
+                px = 3
+                knots = [0.25,0.5,0.75]
+                geo = construct_curve_from_points(x,y, px, \
+                                knots=knots, method='chord', alpha=0.1, nx=None)
+                plt.plot(geo[0].points[:,0],geo[0].points[:,1],'-o')
+                print geo[0].knots[0]
+            i_label_level += 1
+    plt.show()
+
+
+def test_6():
 
     radius=1.
     center=None
@@ -227,5 +307,6 @@ if __name__ == "__main__":
 #    test_1()
 #    test_2()
 #    test_3()
-    test_4()
-#    test_5()
+#    test_4()
+    test_5()
+#    test_6()

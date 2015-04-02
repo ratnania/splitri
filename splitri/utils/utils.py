@@ -1,5 +1,9 @@
 import numpy as np
 from caid.cad_geometry import cad_geometry, cad_nurbs
+from pigasus.utils.manager import context
+from pigasus.fit.curfit import curfit
+from pigasus.fit.curfit import compute_uk
+from caid.cad_geometry import line
 
 def nearest_int(u):
     iu = int(u)
@@ -45,7 +49,93 @@ def cad_geometry_levels(geo_i, geo_e, d):
 
     return geo
 
-def reduce_degree_spline(geo):
-    """
-    this routine creates a new spline of degree -1 than geo (a B-spline curve)
-    """
+
+def construct_curve_from_points(x,y, px, \
+                                knots=None, method='chord', alpha=0.1, nx=None):
+    with context():
+        #-----------------------------------
+        def MakeConstraint(cond, face=None, value=None):
+            if cond.lower() == "closed":
+                constraint = {}
+                constraint['patch_id_m'] = 0
+                constraint['face_m']     = 0
+                constraint['patch_id_s'] = 0
+                constraint['face_s']     = 1
+            if cond.lower() == "c0":
+                constraint = {}
+                constraint['patch_id_m'] = 0
+                constraint['face_m']     = face
+                constraint['type']       = "C0"
+                constraint['values']     = [value]
+            if cond.lower() == "c1":
+                constraint = {}
+                constraint['patch_id_m'] = 0
+                constraint['face_m']     = face
+                constraint['type']       = "C1"
+                constraint['values']     = [value]
+            return constraint
+        #-----------------------------------
+
+#        #-----------------------------------
+#        print(("Approximation using " + method + " knots"))
+#        print(("n " + str(nx) + " p ", str(px)))
+#        #-----------------------------------
+
+        #-----------------------------------
+        # ...
+        list_x = list(x) ; list_y = list(y)
+        # ...
+
+        # ...
+        list_Q = list(zip(list_x, list_y))
+        uk = compute_uk(list_Q, method=method)
+        U1       = []
+        U1      += list(uk)
+        list_xk  = []     ; list_yk  = []
+        list_xk += list_x ; list_yk += list_y
+
+        lists_uk = [U1]
+        lists_xk = [list_xk]
+        lists_yk = [list_yk]
+        # ...
+        #-----------------------------------
+
+        #-----------------------------------
+        constraints = []
+
+        # ... C0_COND
+        constraint = MakeConstraint("C0", 0, [x[0], y[0]])
+        constraints.append(constraint)
+
+        constraint = MakeConstraint("C0", 1, [x[-1], y[-1]])
+        constraints.append(constraint)
+        #-----------------------------------
+
+        #-----------------------------------
+        geo = line(p=[px])
+        if knots is not None:
+            u = knots
+            geo.refine(list_t=[u])
+        else:
+            ub = patch.knots[0][0]
+            ue = patch.knots[0][-1]
+            u = np.linspace(ub,ue,nx+1)[1:-1]
+            geo.refine(list_t=[u])
+        #-----------------------------------
+
+        #-----------------------------------
+        fit = curfit(geometry=geo, constraints=constraints, alpha=alpha)
+        #-----------------------------------
+
+        #-----------------------------------
+        patch_id = 0
+        xk = lists_xk[patch_id]
+        yk = lists_yk[patch_id]
+
+        geo = fit.construct([xk, yk], uk=lists_uk)
+        #-----------------------------------
+
+        fit.PDE.free()
+
+        return geo
+
