@@ -93,7 +93,7 @@ class Bezier(object):
         self._ancestors = ancestors
         self._refiner = refiner
 
-    def find_vertex_domain(self, P, tol=1.e-7):
+    def find_domain_point(self, P, tol=1.e-7):
         """
         returns the vertex id of a given domain point.
         research is performed on the B-net (refined triangulations)

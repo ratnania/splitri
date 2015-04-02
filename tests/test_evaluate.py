@@ -193,7 +193,7 @@ def test_3():
             Py = np.dot(ijk,y) / Bzr.degree
 
             P = np.array([Px,Py])
-            i_vertex = Bzr.find_vertex_domain(P)
+            i_vertex = Bzr.find_domain_point(P)
 #            print i_vertex
             Bzr.triang_ref.x[i_vertex] = nrb.points[j,0]
             Bzr.triang_ref.y[i_vertex] = nrb.points[j,1]
@@ -367,7 +367,7 @@ def test_5():
 #            print Px.shape
 
             P = np.array([Px,Py])
-            i_vertex = Bzr.find_vertex_domain(P)
+            i_vertex = Bzr.find_domain_point(P)
 #            print i_vertex
             if len(i_vertex) >0:
                 i_vertex = i_vertex[0]

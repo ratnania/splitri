@@ -39,7 +39,7 @@ def test_3():
 
     radius=1.
     center=None
-    n_levels=5
+    n_levels=4
     degree = 3
 
     Bzr =  hexagonal(degree, radius=radius, center=center, n_levels=n_levels)
@@ -53,8 +53,26 @@ def test_3():
     plt.triplot(Bzr.triang_ref, lw=0.5, color="blue")
     plt.show()
 
-
 def test_4():
+
+    radius=1.
+    center=None
+    n_levels=4
+    degree = 3
+
+    Bzr =  hexagonal(degree, radius=radius, center=center, n_levels=n_levels)
+
+    for level,col in zip(range(0,n_levels+1), ["r","b", "g", "y","m","k"]):
+        for label in range(0, degree+1):
+            x,y, list_i_vertices = Bzr.get_label_domain_points(level, label, indices=True)
+            print "level ",level," vertices found ", list_i_vertices
+            plt.plot(x,y,'o'+col)
+
+    plt.triplot(Bzr.triang, '-', lw=0.75, color="red")
+    plt.triplot(Bzr.triang_ref, lw=0.5, color="blue")
+    plt.show()
+
+def test_5():
 
     radius=1.
     center=None
@@ -91,9 +109,9 @@ def test_4():
         geo = cad_geometry()
         cad_nrb = cad_nurbs(nrb.knots, nrb.points, weights=nrb.weights)
         geo.append(cad_nrb)
-        for enum,t in enumerate(list_t[:-1]):
-            geo.split(enum,t,axis)
-        geo.split(-1,list_t[-1],axis, normalize=[True,True])
+#        for enum,t in enumerate(list_t[:-1]):
+#            geo.split(enum,t,axis)
+#        geo.split(-1,list_t[-1],axis, normalize=[True,True])
 
 #        for nrb in geo:
 #            plt.plot(nrb.points[:,0],nrb.points[:,1],"-ob")
@@ -136,21 +154,18 @@ def test_4():
         nrb_centers[i,0] = nrb.points[:,0].mean()
         nrb_centers[i,1] = nrb.points[:,1].mean()
 
-
     level = n_levels
     x,y, list_i_vertices = Bzr.get_level_vertices(level, indices=True)
 
-    xmid = x.mean()
-    ymid = y.mean()
+    for i_level in range(0,x.shape[0]):
+        _x = x[i_level]
+        _y = y[i_level]
+        i_vertices = list_i_vertices[i_level]
 
-    # associate triangle to boundary
-    nrb = nearest_boundary(xmid, ymid)
-
-    for i in range(0, len(x)):
-        P = np.array([x[i],y[i]])
-        i_vertex = list_i_vertices[i]
-        if len(i_vertex) >0:
-            i_vertex = i_vertex[0]
+        nrb = list_crv[i_level]
+        for i in range(0, _x.shape[0]):
+            P = np.array([_x[i],_y[i]])
+            i_vertex = i_vertices[i]
             print i, i_vertex, nrb.points.shape[0]
             Bzr.set_control(i_vertex, nrb.points[i,0], nrb.points[i,1])
 
@@ -213,3 +228,4 @@ if __name__ == "__main__":
 #    test_2()
 #    test_3()
     test_4()
+#    test_5()

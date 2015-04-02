@@ -90,7 +90,7 @@ class square_boxsplines(object):
     def L(self):
         return self._L
 
-    def find_vertex_domain(self, P):
+    def find_domain_point(self, P):
         x_ref = self.triang_ref.x
         y_ref = self.triang_ref.y
 
@@ -195,8 +195,7 @@ class hexagonal(Bezier):
                 I2 = 1
             triangles.append([I0,I1,I2])
 
-        degree = n_levels + 1
-        Bzr = Bezier(degree, points[:,0], points[:,1], triangles)
+        Bzr = Bezier(n_levels, points[:,0], points[:,1], triangles)
         triang = Bzr.triang_ref
 
         Bezier.__init__(self, degree, triang.x, triang.y, triang.triangles)
@@ -222,7 +221,14 @@ class hexagonal(Bezier):
         """
         assert(level <= self.n_levels)
 
-        radius = (level+1) * self.radius / (self.n_levels+1)
+        if level == 0:
+            if not indices:
+                return [self.center[0]],  [self.center[1]]
+            else:
+                i_vertex  = self.find_vertex(self.center)
+                return [self.center[0]],  [self.center[1]],i_vertex
+
+        radius = level * self.radius / (self.n_levels)
         n_angles = 6
         angles = np.linspace(0.,2*np.pi,n_angles+1)
 
@@ -230,27 +236,88 @@ class hexagonal(Bezier):
         x = radius * cos(angles)
         y = radius * sin(angles)
 
-        x_new = [] ; y_new = []
+        x_new = [] ; y_new = [] ; list_i_vertices = []
         for i in range(0, n_angles):
             # remove the last point
-            t = np.linspace(0.,1.,level+2)[0:-1]
+            t = np.linspace(0.,1.,level+1)[0:-1]
 
             x_tmp = (1.-t) * x[i] + t * x[i+1]
             y_tmp = (1.-t) * y[i] + t * y[i+1]
 
-            x_new += list(x_tmp)
-            y_new += list(y_tmp)
+            i_vertices = np.zeros(x_tmp.shape[0],dtype=np.int32)
+            for j in range(0, x_tmp.shape[0]):
+                P = np.array([x_tmp[j],y_tmp[j]])
+                i_vertex  = self.find_vertex(P)
+                plt.plot(P[0],P[1],"dk")
+                if len(i_vertex) > 0:
+                    i_vertices[j] = i_vertex[0]
 
-        x = np.array(x_new)
-        y = np.array(y_new)
+            x_new.append(x_tmp)
+            y_new.append(y_tmp)
+            list_i_vertices.append(i_vertices)
+
+        x_new = np.array(x_new)
+        y_new = np.array(y_new)
+        i_vertices= np.array(list_i_vertices, dtype=np.int32)
 
         if not indices:
-            return x,y
+            return x_new,y_new
         else:
-            list_i_vertices = []
-            for i in range(0, x.shape[0]):
-                P = np.array([x[i],y[i]])
-                i_vertex = self.find_vertex(P)
-                list_i_vertices.append(i_vertex)
-            return x,y,list_i_vertices
+            return x_new,y_new,i_vertices
 
+    def get_label_domain_points(self, level, label, indices=False):
+        """
+        returns domain points on the label level.
+        the returned array has a size of
+        6*(level+1)
+        returns indices of these points on the triangulation, if indices is True
+        """
+
+        if level == 0:
+            if not indices:
+                return [self.center[0]],  [self.center[1]]
+            else:
+                i_vertex  = self.find_vertex(self.center)
+                return [self.center[0]],  [self.center[1]],i_vertex
+
+        n_label_levels = self.n_levels * self.degree
+        i_label_level  = (level-1) * self.degree + label
+
+        assert(i_label_level <= n_label_levels)
+
+        radius = i_label_level * self.radius / n_label_levels
+        n_angles = 6
+        angles = np.linspace(0.,2*np.pi,n_angles+1)
+
+        # construct points
+        x = radius * cos(angles)
+        y = radius * sin(angles)
+
+        x_new = [] ; y_new = [] ; list_i_vertices = []
+        for i in range(0, n_angles):
+            # remove the last point
+            t = np.linspace(0.,1.,i_label_level+1)[0:-1]
+
+            x_tmp = (1.-t) * x[i] + t * x[i+1]
+            y_tmp = (1.-t) * y[i] + t * y[i+1]
+
+            i_vertices = np.zeros(x_tmp.shape[0],dtype=np.int32)
+            for j in range(0, x_tmp.shape[0]):
+                P = np.array([x_tmp[j],y_tmp[j]])
+                i_vertex  = self.find_domain_point(P)
+                plt.plot(P[0],P[1],"dk")
+                if len(i_vertex) > 0:
+                    i_vertices[j] = i_vertex[0]
+
+            x_new.append(x_tmp)
+            y_new.append(y_tmp)
+            list_i_vertices.append(i_vertices)
+
+        x_new = np.array(x_new)
+        y_new = np.array(y_new)
+        i_vertices= np.array(list_i_vertices, dtype=np.int32)
+
+        if not indices:
+            return x_new,y_new
+        else:
+            return x_new,y_new,i_vertices

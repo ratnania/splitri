@@ -41,7 +41,7 @@ class BoxSpline_211(BoxSpline):
         list_P.append(center+np.array([-dx,-dy])) ;  list_v.append(1.)
 
         for P,v in zip(list_P, list_v):
-            i = triang.find_vertex_domain(P)
+            i = triang.find_domain_point(P)
             self._b_coeff[i] = v
         self._b_coeff /= 2.
 
@@ -91,7 +91,7 @@ class BoxSpline_221(BoxSpline):
 
 
         for P,v in zip(list_P, list_v):
-            i = triang.find_vertex_domain(P)
+            i = triang.find_domain_point(P)
             self._b_coeff[i] = v
         self._b_coeff /= 6.
 
@@ -166,7 +166,7 @@ class BoxSpline_222(BoxSpline):
             list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
 
         for P,v in zip(list_P, list_v):
-            i = triang.find_vertex_domain(P)
+            i = triang.find_domain_point(P)
             self._b_coeff[i] = v
         self._b_coeff /= 24.
 
@@ -208,7 +208,7 @@ class BoxSpline_1111(BoxSpline):
             list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
 
         for P,v in zip(list_P, list_v):
-            i = triang.find_vertex_domain(P)
+            i = triang.find_domain_point(P)
             self._b_coeff[i] = v
         # TODO scaling to be corrected
         self._b_coeff /= 2.
@@ -251,7 +251,7 @@ class BoxSpline_2111(BoxSpline):
             list_P.append(center+np.array([i*dx,j*dy])) ;  list_v.append(v)
 
         for P,v in zip(list_P, list_v):
-            i = triang.find_vertex_domain(P)
+            i = triang.find_domain_point(P)
             self._b_coeff[i] = v
 
         self._b_coeff /= 48.
