@@ -1,0 +1,29 @@
+! -*- f90 -*-
+
+python module boxsplines 
+interface
+module bnet 
+     subroutine bs3dm(L,M,N,MY_SIZE,A,B,BSIZE1,BSIZE2)
+       integer(kind=4), intent(in)  ,   check(L>=1)     :: L
+       integer(kind=4), intent(in)  ,   check(M>=1)     :: M
+       integer(kind=4), intent(in)  ,   check(N>=1)     :: N 
+       integer(kind=4), intent(in), check(MY_SIZE>=1), check(MY_SIZE>=(L+M+N-2)*(L+N)+1), check(MY_SIZE>=(L+M+N-2)*(M+N)+1) :: MY_SIZE
+       integer(kind=4), intent(c,out)                   :: A(0:MY_SIZE, 0:MY_SIZE)
+       integer(kind=4), intent(c,out)                   :: B(0:MY_SIZE, 0:MY_SIZE)
+       integer(kind=4), intent(out)                     :: BSIZE1
+       integer(kind=4), intent(out)                     :: BSIZE2
+     end subroutine bs3dm
+
+!     subroutine bs4dm(L,M,N,MY_SIZE,A,B,BSIZE1,BSIZE2)
+!       integer(kind=4), intent(in)  ,   check(L>=1)     :: L
+!       integer(kind=4), intent(in)  ,   check(M>=1)     :: M
+!       integer(kind=4), intent(in)  ,   check(N>=1)     :: N 
+!       integer(kind=4), intent(in), check(MY_SIZE>=1), check(MY_SIZE>=(L+M+N-2)*(L+N)+1), check(MY_SIZE>=(L+M+N-2)*(M+N)+1) :: MY_SIZE
+!       integer(kind=4), intent(c,out)                   :: A(0:MY_SIZE, 0:MY_SIZE)
+!       integer(kind=4), intent(c,out)                   :: B(0:MY_SIZE, 0:MY_SIZE)
+!       integer(kind=4), intent(out)                     :: BSIZE1
+!       integer(kind=4), intent(out)                     :: BSIZE2
+!     end subroutine bs4dm
+end interface
+end module bnet
+end module boxsplines
