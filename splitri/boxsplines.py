@@ -8,6 +8,38 @@ import scipy
 from trirefine import UniformBezierTriRefiner
 from splitri.triangulation import triangulation_square_I, triangulation_square_II
 
+import splitri.core.boxsplines as bx
+from scipy.misc import factorial
+
+class Bnet(object):
+    def __init__(self, l, m, n, k=None):
+        my_size=501
+        bsize1=0; bsize2=0
+        b = np.zeros((my_size,my_size), dtype=np.int32)
+        a = np.zeros((my_size,my_size), dtype=np.int32)
+
+        if k is None:
+            a,b,bsize1,bsize2,d=bx.bnet.bs3dm(l,m,n,my_size)
+            d = factorial(d)
+        else:
+            a,b,bsize1,bsize2,d1,d2=bx.bnet.bs4dm(k,l,m,n,my_size)
+            d = factorial(d1) * d2
+        self._bnet = b[0:bsize1+1, 0:bsize2+1] * 1./d
+        self._bnet_int = b[0:bsize1+1, 0:bsize2+1]
+        self._d = d
+
+    @property
+    def coeff(self):
+        return self._bnet
+
+    @property
+    def coeff_int(self):
+        return self._bnet_int
+
+    @property
+    def factor(self):
+        return self._d
+
 class BoxSpline(object):
     def __init__(self, triang):
         """
