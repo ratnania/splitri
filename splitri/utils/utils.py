@@ -1,8 +1,5 @@
 import numpy as np
 from caid.cad_geometry import cad_geometry, cad_nurbs
-from pigasus.utils.manager import context
-from pigasus.fit.curfit import curfit
-from pigasus.fit.curfit import compute_uk
 from caid.cad_geometry import line
 
 def nearest_int(u):
@@ -52,6 +49,7 @@ def cad_geometry_levels(geo_i, geo_e, d):
 
 def construct_curve_from_points(x,y, px, \
                                 knots=None, method='chord', alpha=0.1, nx=None):
+    raise()
     with context():
         #-----------------------------------
         def MakeConstraint(cond, face=None, value=None):
