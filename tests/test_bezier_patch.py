@@ -178,7 +178,7 @@ def make_triangles_square_boxspline_I(n,degree):
     x = X.reshape(X.size)
     y = Y.reshape(Y.size)
 
-    i_t = range(0,n)
+    i_t = list(range(0,n))
     i_X,i_Y = np.array(np.meshgrid(i_t,i_t), dtype=np.int32)
 
     i_x = i_X.reshape(i_X.size)
@@ -277,7 +277,7 @@ def test_2():
     bzr = make_triangles_1(3)
     bzr_1 = bzr.copy()
 
-    print bzr.find_simplex([0.5,0.5])
+    print(bzr.find_simplex([0.5,0.5]))
 
     xlim = [-2.2, 2.2]
     ylim = [-2.2, 2.2]
@@ -370,7 +370,7 @@ def test_boxspline_1():
 #    print bzr.find_simplex([0.65, 0.5])
 
     b_coeff = np.zeros_like(x)
-    print b_coeff.shape
+    print(b_coeff.shape)
 
 #    b_coeff[:10,0:6] = [1.,1.,1.,1.,1.,1.]
 #    b_coeff[0,0:6] = [1.,1.,1.,1.,1.,1.]
@@ -388,7 +388,7 @@ def test_boxspline_1():
 
     bzr.set_b_coefficients(b_coeff)
 
-    print bzr.unique_points.shape
+    print(bzr.unique_points.shape)
 
 
 #    plt.figure()

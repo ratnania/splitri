@@ -5,7 +5,7 @@ from scipy.spatial import Delaunay
 import matplotlib.tri as tri
 import matplotlib.pyplot as plt
 import scipy
-from trirefine import UniformBezierTriRefiner
+from .trirefine import UniformBezierTriRefiner
 from splitri.triangulation import triangulation_square_I, triangulation_square_II
 
 import splitri.core.boxsplines as bx

@@ -25,7 +25,7 @@ def test_1():
 
     Bzr =  hexagonal(degree, radius=radius, center=center, n_levels=n_levels)
 
-    for level,col in zip(range(0,n_levels+1), ["r","b", "g", "y","m","k"]):
+    for level,col in zip(list(range(0,n_levels+1)), ["r","b", "g", "y","m","k"]):
         x,y, list_i_vertices = Bzr.get_level_vertices(level, indices=True)
 #        print "level ",level," vertices found ", list_i_vertices
         plt.plot(x,y,'o'+col)
@@ -74,7 +74,7 @@ def get_non_vanishing_boxsplines(Bzr, T_id, mult, tol=1.e-7):
     x_mid = 1./3. * (x_T.sum())
     y_mid = 1./3. * (y_T.sum())
     P = np.array([x_mid, y_mid])
-    print P
+    print(P)
     # ...
 
     # ... create a list of supports
@@ -86,7 +86,7 @@ def get_non_vanishing_boxsplines(Bzr, T_id, mult, tol=1.e-7):
 
         list_Bzr.append(Bzr_loc)
     # ...
-    print len(list_Bzr)
+    print(len(list_Bzr))
 
     # ...
     list_non_vanishing_Bzr = []
@@ -99,7 +99,7 @@ def get_non_vanishing_boxsplines(Bzr, T_id, mult, tol=1.e-7):
             ind += 1
         list_indices.append(ind)
     # ...
-    print len(list_non_vanishing_Bzr)
+    print(len(list_non_vanishing_Bzr))
 
     return list_Bzr, list_non_vanishing_Bzr, list_indices
 # ..................................
@@ -156,7 +156,7 @@ def test_2():
     list_Bzr, list_non_vanishing_Bzr, list_indices = \
             get_non_vanishing_boxsplines(Bzr, T_id, mult, tol=1.e-7)
 
-    print ">>> nen : ", len(list_non_vanishing_Bzr)
+    print(">>> nen : ", len(list_non_vanishing_Bzr))
 
 #    for Bzr_loc in list_non_vanishing_Bzr[:]:
 #        plot_support(Bzr_loc, color="blue")

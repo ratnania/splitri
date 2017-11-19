@@ -6,7 +6,7 @@ class bernstein(object):
     def __init__(self, degree):
         self._degree = degree
 
-        _arr = np.array(range(0, self.degree+1))
+        _arr = np.array(list(range(0, self.degree+1)))
         self._factorial = factorial(_arr, exact=False)
 
     @property
@@ -43,6 +43,6 @@ class bernstein(object):
 
         if debug:
             if not np.isfinite(B):
-                print "Problem occurs with ",  x_barycentric,w,i,j,k, B
+                print(("Problem occurs with ",  x_barycentric,w,i,j,k, B))
 
         return B

@@ -49,7 +49,7 @@ def cad_geometry_levels(geo_i, geo_e, d):
 
 def construct_curve_from_points(x,y, px, \
                                 knots=None, method='chord', alpha=0.1, nx=None):
-    raise()
+    raise NotImplementedError('TODO')
     with context():
         #-----------------------------------
         def MakeConstraint(cond, face=None, value=None):

@@ -443,7 +443,7 @@ def TWB(degree):
 if __name__=="__main__":
     u,v,w = TWB(4)
     for _u,_v,_w in zip(u,v,w):
-        print  _u,_v,_w
+        print((_u,_v,_w))
     import matplotlib.pyplot as plt
     # TODO need to convert from barycentric to cartesian coordinates
     plt.plot(u,v,'ob')

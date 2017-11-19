@@ -45,9 +45,9 @@ def test_3():
 
     Bzr =  hexagonal(degree, radius=radius, center=center, n_levels=n_levels)
 
-    for level,col in zip(range(0,n_levels+1), ["r","b", "g", "y","m","k"]):
+    for level,col in zip(list(range(0,n_levels+1)), ["r","b", "g", "y","m","k"]):
         x,y, list_i_vertices = Bzr.get_level_vertices(level, indices=True)
-        print "level ",level," vertices found ", list_i_vertices
+        print("level ",level," vertices found ", list_i_vertices)
         plt.plot(x,y,'o'+col)
 
     plt.triplot(Bzr.triang, '-', lw=0.75, color="red")
@@ -63,10 +63,10 @@ def test_4():
 
     Bzr =  hexagonal(degree, radius=radius, center=center, n_levels=n_levels)
 
-    for level,col in zip(range(0,n_levels+1), ["r","b", "g", "y","m","k"]):
+    for level,col in zip(list(range(0,n_levels+1)), ["r","b", "g", "y","m","k"]):
         for label in range(0, degree+1):
             x,y, list_i_vertices = Bzr.get_label_domain_points(level, label, indices=True)
-            print "level ",level," vertices found ", list_i_vertices
+            print("level ",level," vertices found ", list_i_vertices)
             plt.plot(x,y,'o'+col)
 
     plt.triplot(Bzr.triang, '-', lw=0.75, color="red")
@@ -119,7 +119,7 @@ def test_5():
     pts_level = list_pts[0]
     pts_section = pts_level[0]
     pts = pts_section[0]
-    print len(list_pts),len(pts_level), len(pts_section), len(pts)
+    print(len(list_pts),len(pts_level), len(pts_section), len(pts))
 
 #    for i in range(0,len(list_pts)):
 #        pts_level = list_pts[i]
@@ -147,7 +147,7 @@ def test_5():
                 geo = construct_curve_from_points(x,y, px, \
                                 knots=knots, method='chord', alpha=0.1, nx=None)
                 plt.plot(geo[0].points[:,0],geo[0].points[:,1],'-o')
-                print geo[0].knots[0]
+                print(geo[0].knots[0])
             i_label_level += 1
     plt.show()
 
@@ -246,7 +246,7 @@ def test_6():
         for i in range(0, _x.shape[0]):
             P = np.array([_x[i],_y[i]])
             i_vertex = i_vertices[i]
-            print i, i_vertex, nrb.points.shape[0]
+            print(i, i_vertex, nrb.points.shape[0])
             Bzr.set_control(i_vertex, nrb.points[i,0], nrb.points[i,1])
 
 #    plt.plot(Bzr.triang_ref.x, Bzr.triang_ref.y,"xr")
@@ -293,7 +293,7 @@ def test_6():
 #    plt.triplot(triang_new, '-', lw=0.5, color="green")
 
     values = np.array(values)
-    print values.min(), values.max()
+    print(values.min(), values.max())
     plt.tripcolor(triang_new, values, shading='gouraud', cmap=plt.cm.rainbow)
     plt.colorbar()
 

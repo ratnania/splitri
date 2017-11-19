@@ -79,7 +79,7 @@ def test_1():
     triang_new, values= refiner.refine_field(values, subdiv=3)
 
     values = np.array(values)
-    print values.min(), values.max()
+    print(values.min(), values.max())
 
     plt.tripcolor(triang_new, values, shading='gouraud', cmap=plt.cm.rainbow)
 
@@ -134,7 +134,7 @@ def test_2():
     plt.triplot(triang_new, '-', lw=0.5, color="green")
 
     values = np.array(values)
-    print values.min(), values.max()
+    print(values.min(), values.max())
     plt.tripcolor(triang_new, values, shading='gouraud', cmap=plt.cm.rainbow)
 
 #    xlim = [-1.2,1.2] ; ylim = [-1.2,1.2]
@@ -235,7 +235,7 @@ def test_3():
 #    plt.triplot(triang_new, '-', lw=0.5, color="green")
 
     values = np.array(values)
-    print values.min(), values.max()
+    print(values.min(), values.max())
     plt.tripcolor(triang_new, values, shading='gouraud', cmap=plt.cm.rainbow)
 
     xlim = [-1.2,1.2] ; ylim = [-1.2,1.2]
@@ -417,7 +417,7 @@ def test_5():
 #    plt.triplot(triang_new, '-', lw=0.5, color="green")
 
     values = np.array(values)
-    print values.min(), values.max()
+    print(values.min(), values.max())
     plt.tripcolor(triang_new, values, shading='gouraud', cmap=plt.cm.rainbow)
     plt.colorbar()
 

@@ -22,9 +22,9 @@
 from splitri.boxsplines import Bnet
 
 bnet1 = Bnet(3,3,3)
-print bnet1.coeff
+print(bnet1.coeff)
 bnet2 = Bnet(2,2,2,2)
-print bnet2.coeff
+print(bnet2.coeff)
 
 import matplotlib.pyplot as plt
 plt.pcolor(bnet1.coeff)
