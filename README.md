@@ -1,0 +1,3 @@
+# SPLITRI
+
+Splines On Triangulation
