@@ -64,7 +64,7 @@ class BezierTriangulationConstructor(object):
     @property
     def degree(self):
         # TODO must take the nearest integer rather than int
-        return int((np.sqrt(8*self.shape+1) -1)/2) - 1
+        return int((np.sqrt(8*self.shape+1) -1)//2) - 1
 
     @property
     def n_patchs(self):
@@ -133,7 +133,7 @@ class BezierTriangulationConstructor(object):
         self._local_id = np.zeros((degree+1, degree+1, degree+1) \
                                    , dtype=np.int32)
 
-        n = (degree+1)*(degree+2)/2
+        n = (degree+1)*(degree+2)//2
         i_pos = 0
         for i in range(0, degree+1):
             for j in range(0, degree+1-i):
@@ -167,7 +167,7 @@ class BezierTriangulationConstructor(object):
         self._ids_on_edges.append(ids_on_edge)
 
     def _create_b_net(self, degree, vertices, control, weights, method):
-        n = (degree+1)*(degree+2)/2
+        n = (degree+1)*(degree+2)//2
         dim = vertices.shape[-1]
         n_patchs = vertices.shape[0]
         self._array = np.zeros((n_patchs,n,dim+1+1))

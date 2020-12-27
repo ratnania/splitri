@@ -13,7 +13,7 @@ import matplotlib.cm as cm
 
 def test_1():
     L = 2.
-    n = 10
+    n = 20
     degree = 3
 
     triang = collela(n)

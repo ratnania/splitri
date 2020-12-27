@@ -1,6 +1,6 @@
 # -*- coding: UTF-8 -*-
 import numpy as np
-from scipy.misc import factorial
+from scipy.special import factorial
 
 class bernstein(object):
     def __init__(self, degree):

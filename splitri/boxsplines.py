@@ -9,7 +9,7 @@ from .trirefine import UniformBezierTriRefiner
 from splitri.triangulation import triangulation_square_I, triangulation_square_II
 
 import splitri.core.boxsplines as bx
-from scipy.misc import factorial
+from scipy.special import factorial
 
 class Bnet(object):
     def __init__(self, l, m, n, k=None):
